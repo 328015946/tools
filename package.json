@@ -1,0 +1,29 @@
+{
+  "name": "xiao-nuxt4",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@nuxtjs/i18n": "^10.2.1",
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "@types/dompurify": "^3.0.5",
+    "@types/marked": "^5.0.2",
+    "browser-image-compression": "^2.0.2",
+    "dayjs": "^1.11.19",
+    "dompurify": "^3.3.0",
+    "highlight.js": "^11.11.1",
+    "marked": "^17.0.1",
+    "nuxt": "^4.2.1",
+    "vue": "^3.5.24",
+    "vue-router": "^4.6.3"
+  },
+  "devDependencies": {
+    "@tailwindcss/typography": "^0.5.19"
+  }
+}
