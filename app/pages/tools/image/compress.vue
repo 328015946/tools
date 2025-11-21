@@ -1,3 +1,11 @@
+<!--
+ * @Author: zengxiaobin
+ * @Date: 2025-11-21 15:53:18
+ * @LastEditors: xiaobin
+ * @LastEditTime: 2025-11-21 17:07:51
+ * @FilePath: \xiao-nuxt4\app\pages\tools\image\compress.vue
+ * @Description: 注释
+-->
 <template>
   <div class="max-w-6xl mx-auto py-8 px-4">
     <!-- 标题 -->

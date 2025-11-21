@@ -130,5 +130,52 @@
     "sample": "# Welcome to Markdown Editor\n\nWrite and preview in real-time.\n\n- **Bold Text**\n- *Italic Text*\n- [Link](https://nuxt.com)\n\n> Blockquote\n\n```javascript\nconsole.log('Hello World');\n```",
     "copy_html": "Copy HTML",
     "clear": "Clear"
+  },
+  "uuid": {
+    "title": "UUID Generator",
+    "desc": "Generate random UUID/GUID in batches",
+    "generate": "Generate",
+    "count": "Count",
+    "hyphen": "Hyphens (-)",
+    "uppercase": "Uppercase",
+    "copy_all": "Copy All"
+  },
+  "url": {
+    "title": "URL Encode/Decode",
+    "desc": "Encode and Decode URL parameters",
+    "input": "Input",
+    "output": "Result",
+    "encode": "Encode",
+    "decode": "Decode",
+    "clear": "Clear"
+  },
+  "qrcode": {
+    "title": "QR Code Generator",
+    "desc": "Convert text or URLs into QR Code images",
+    "input_label": "Text or URL",
+    "placeholder": "e.g. https://nuxt.com",
+    "color": "Color",
+    "size": "Size",
+    "download": "Download",
+    "generating": "Generating...",
+    "margin": "Margin"
+  },
+  "img_base64": {
+    "title": "Image to Base64",
+    "desc": "Convert image to DataURI (Base64) string",
+    "drop_zone": "Click or Drop Image",
+    "format": "Format",
+    "copy_result": "Copy Result",
+    "preview": "Preview"
+  },
+  "diff": {
+    "title": "Text Diff",
+    "desc": "Compare differences between two texts or code snippets",
+    "left_label": "Original",
+    "right_label": "Modified",
+    "diff_char": "Char Diff",
+    "diff_line": "Line Diff",
+    "diff_json": "JSON Diff",
+    "no_diff": "Texts are identical ✅"
   }
 }

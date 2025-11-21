@@ -130,5 +130,52 @@
     "sample": "# 欢迎使用 Markdown 编辑器\n\n你可以在这里实时编写和预览。\n\n- **加粗文本**\n- *斜体文本*\n- [链接](https://nuxt.com)\n\n> 引用段落\n\n```javascript\nconsole.log('Hello World');\n```",
     "copy_html": "复制 HTML",
     "clear": "清空"
+  },
+  "uuid": {
+    "title": "UUID 生成器",
+    "desc": "批量生成随机 UUID/GUID",
+    "generate": "生成 UUID",
+    "count": "数量",
+    "hyphen": "带连字符 (-)",
+    "uppercase": "大写字母",
+    "copy_all": "复制全部"
+  },
+  "url": {
+    "title": "URL 编码/解码",
+    "desc": "对 URL 参数进行 Encode 和 Decode",
+    "input": "输入内容",
+    "output": "结果",
+    "encode": "编码 (Encode)",
+    "decode": "解码 (Decode)",
+    "clear": "清空"
+  },
+  "qrcode": {
+    "title": "二维码生成",
+    "desc": "将文本或链接转换为二维码图片",
+    "input_label": "输入文本或网址",
+    "placeholder": "例如: https://nuxt.com",
+    "color": "颜色",
+    "size": "尺寸",
+    "download": "下载二维码",
+    "generating": "生成中...",
+    "margin": "边距 (Margin)"
+  },
+  "img_base64": {
+    "title": "图片转 Base64",
+    "desc": "将图片转换为 DataURI (Base64) 字符串，支持 CSS/HTML 格式",
+    "drop_zone": "点击或拖拽图片",
+    "format": "输出格式",
+    "copy_result": "复制结果",
+    "preview": "预览"
+  },
+  "diff": {
+    "title": "文本/代码对比",
+    "desc": "在线对比两段文本或代码的差异 (Diff)",
+    "left_label": "原始文本 (Original)",
+    "right_label": "修改后文本 (Modified)",
+    "diff_char": "字符对比",
+    "diff_line": "行对比",
+    "diff_json": "JSON 对比",
+    "no_diff": "两段文本完全一致 ✅"
   }
 }

@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-21 15:47:06
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-21 15:47:15
+ * @LastEditTime: 2025-11-21 17:20:00
  * @FilePath: \xiao-nuxt4\app\composables\useTools.ts
  * @Description: 注释
  */
@@ -68,6 +68,59 @@ export const useTools = () => {
       category: 'nav.text_tools',
       categorySlug: 'text',
       path: '/tools/text/markdown'
+    },
+    {
+      id: 7,
+      nameKey: 'uuid.title',
+      descKey: 'uuid.desc',
+      icon: '🆔',
+      color: 'bg-indigo-100 text-indigo-600',
+      category: 'nav.dev_tools',
+      categorySlug: 'dev',
+      path: '/tools/dev/uuid'
+    },
+    // 新增 2: URL (Dev)
+    {
+      id: 8,
+      nameKey: 'url.title',
+      descKey: 'url.desc',
+      icon: '🔗',
+      color: 'bg-cyan-100 text-cyan-600',
+      category: 'nav.dev_tools',
+      categorySlug: 'dev',
+      path: '/tools/dev/url'
+    },
+    // 新增 3: QR Code (Image)
+    {
+      id: 9,
+      nameKey: 'qrcode.title',
+      descKey: 'qrcode.desc',
+      icon: '📱',
+      color: 'bg-gray-100 text-gray-800',
+      category: 'nav.image_tools',
+      categorySlug: 'image',
+      path: '/tools/image/qrcode'
+    },
+    {
+      id: 10,
+      nameKey: 'img_base64.title',
+      descKey: 'img_base64.desc',
+      icon: '🧬',
+      color: 'bg-pink-100 text-pink-600',
+      category: 'nav.image_tools',
+      categorySlug: 'image',
+      path: '/tools/image/base64'
+    },
+    // 新增: 文本对比 (Dev 类 或 Text 类，这里放 Text 更合适)
+    {
+      id: 11,
+      nameKey: 'diff.title',
+      descKey: 'diff.desc',
+      icon: '⚖️',
+      color: 'bg-yellow-100 text-yellow-700',
+      category: 'nav.text_tools',
+      categorySlug: 'text',
+      path: '/tools/text/diff'
     }
   ]
 
