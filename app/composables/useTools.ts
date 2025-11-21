@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-21 15:47:06
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-21 17:20:00
+ * @LastEditTime: 2025-11-21 17:46:41
  * @FilePath: \xiao-nuxt4\app\composables\useTools.ts
  * @Description: 注释
  */
@@ -121,6 +121,26 @@ export const useTools = () => {
       category: 'nav.text_tools',
       categorySlug: 'text',
       path: '/tools/text/diff'
+    },
+    {
+      id: 12, // ID 递增
+      nameKey: 'hash.title',
+      descKey: 'hash.desc',
+      icon: '#️⃣', // 或者 🔒
+      color: 'bg-slate-100 text-slate-700',
+      category: 'nav.dev_tools',
+      categorySlug: 'dev',
+      path: '/tools/dev/hash'
+    },
+     {
+      id: 13,
+      nameKey: 'pwd.title',
+      descKey: 'pwd.desc',
+      icon: '🔑',
+      color: 'bg-red-100 text-red-600',
+      category: 'nav.other_tools',
+      categorySlug: 'other', // ✅ 新分类 slug
+      path: '/tools/other/password'
     }
   ]
 

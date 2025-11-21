@@ -4,6 +4,7 @@
     "dev_tools": "Dev Tools",
     "image_tools": "Image Utils",
     "text_tools": "Text Tools",
+    "other_tools": "Other Tools",
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
@@ -177,5 +178,34 @@
     "diff_line": "Line Diff",
     "diff_json": "JSON Diff",
     "no_diff": "Texts are identical ✅"
+  },
+  "hash": {
+    "title": "Hash Calculator",
+    "desc": "Calculate MD5, SHA1, SHA256, SHA512 hashes online",
+    "input_label": "Input Text",
+    "placeholder": "Enter text to hash...",
+    "uppercase": "Uppercase",
+    "hmac_mode": "HMAC Mode (Keyed-Hash)",
+    "key_label": "Secret Key",
+    "copy": "Copy",
+    "clear": "Clear"
+  },
+  "pwd": {
+    "title": "Password Generator",
+    "desc": "Generate strong and secure random passwords",
+    "result_label": "Generated Password",
+    "length": "Length",
+    "options": "Options",
+    "opt_uppercase": "Uppercase (A-Z)",
+    "opt_lowercase": "Lowercase (a-z)",
+    "opt_numbers": "Numbers (0-9)",
+    "opt_symbols": "Symbols (!{'@'}#$)",
+    "opt_exclude": "Exclude Ambiguous (1, l, I, 0, O)",
+    "generate": "Regenerate",
+    "copy": "Copy",
+    "strength": "Strength",
+    "str_weak": "Weak",
+    "str_medium": "Medium",
+    "str_strong": "Strong"
   }
 }

@@ -4,6 +4,7 @@
     "dev_tools": "开发工具",
     "image_tools": "图像工具",
     "text_tools": "文本工具",
+    "other_tools": "其他工具",
     "login": "登录",
     "register": "注册",
     "logout": "退出",
@@ -177,5 +178,34 @@
     "diff_line": "行对比",
     "diff_json": "JSON 对比",
     "no_diff": "两段文本完全一致 ✅"
+  },
+  "hash": {
+    "title": "哈希(Hash) 计算器",
+    "desc": "在线计算文本的 MD5, SHA1, SHA256, SHA512 散列值",
+    "input_label": "输入文本",
+    "placeholder": "输入需要计算 Hash 的内容...",
+    "uppercase": "大写结果",
+    "hmac_mode": "HMAC 模式 (带密钥)",
+    "key_label": "密钥 (Key)",
+    "copy": "复制",
+    "clear": "清空"
+  },
+  "pwd": {
+    "title": "随机密码生成器",
+    "desc": "生成高强度、安全的随机密码",
+    "result_label": "生成的密码",
+    "length": "密码长度",
+    "options": "字符选项",
+    "opt_uppercase": "大写字母 (A-Z)",
+    "opt_lowercase": "小写字母 (a-z)",
+    "opt_numbers": "数字 (0-9)",
+    "opt_symbols": "特殊符号 (!{'@'}#$)",
+    "opt_exclude": "排除易混淆字符 (1, l, I, 0, O)",
+    "generate": "刷新生成",
+    "copy": "复制密码",
+    "strength": "强度评估",
+    "str_weak": "弱",
+    "str_medium": "中",
+    "str_strong": "强"
   }
 }

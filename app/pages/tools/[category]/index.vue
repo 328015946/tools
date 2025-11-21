@@ -39,11 +39,12 @@
     if (slug === 'dev') return t('nav.dev_tools')
     if (slug === 'image') return t('nav.image_tools')
     if (slug === 'text') return t('nav.text_tools')
+     if (slug === 'other') return t('nav.other_tools') // ✅ 新增
     return 'Unknown Category'
   })
 
   // 如果是无效的分类，可以做一个简单的判断
-  if (!['dev', 'image', 'text'].includes(categorySlug.value)) {
+  if (!['dev', 'image', 'text', 'other'].includes(categorySlug.value)) {
     // 可以抛出 404 错误
     throw createError({ statusCode: 404, statusMessage: 'Category Not Found' })
   }

@@ -2,99 +2,117 @@
   <nav class="bg-white shadow-md border-b border-gray-100 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
-        <!-- 左侧 Logo 和 导航 -->
+        <!-- 左侧 Logo 和 导航菜单 -->
         <div class="flex">
+          <!-- Logo -->
           <div class="flex-shrink-0 flex items-center">
-            <!-- ✅ 优化前: :to="localePath('/')" -->
-            <!-- ✅ 优化后: to="/" -->
             <NuxtLinkLocale to="/" class="flex items-center gap-2">
-              <!-- Xiao Xi Logo: Emerald Code X -->
-
-              <!-- Xiao Xi Full Logo: Horizontal -->
               <svg width="40" height="40" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-                <!-- 背景 -->
                 <rect width="40" height="40" rx="10" fill="#0F172A" />
-
-                <!-- X 编织图标（保持居中略上） -->
                 <path d="M13 11 L20 18 L13 25" stroke="#10B981" stroke-width="3.2" stroke-linecap="round" />
                 <path d="M27 11 L20 18 L27 25" stroke="white" stroke-width="3.2" stroke-linecap="round" />
-
-                <!-- xi 放上面 -->
                 <text x="28" y="16" font-size="9.5" font-family="monospace" fill="#10B981">xi</text>
-
-                <!-- xiao 放下面 -->
                 <text x="6" y="36" font-size="9.5" font-family="monospace" fill="white">xiao</text>
               </svg>
             </NuxtLinkLocale>
           </div>
 
-          <div class="hidden sm:ml-8 sm:flex sm:space-x-6">
+          <!-- 桌面端主导航 -->
+          <div class="hidden sm:ml-8 sm:flex sm:space-x-2">
+            <!-- 1. 首页 -->
             <NuxtLinkLocale
               to="/"
-              exact-active-class="!border-emerald-400 !text-emerald-400"
-              class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-emerald-400 hover:border-emerald-400 transition">
+              active-class="!border-emerald-400 !text-emerald-400"
+              class="inline-flex items-center px-3 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 transition h-full">
               {{ $t('nav.home') }}
             </NuxtLinkLocale>
 
-            <NuxtLinkLocale
-              to="/tools/dev"
-              exact-active-class="!border-emerald-400 !text-emerald-400"
-              class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-emerald-400 hover:border-emerald-400 transition">
-              {{ $t('nav.dev_tools') }}
-            </NuxtLinkLocale>
+            <!-- 2. 分类菜单 (Mega Menu) -->
+            <div v-for="menu in menus" :key="menu.slug" class="relative group h-full flex items-center">
+              <!-- 主链接 -->
+              <NuxtLinkLocale
+                :to="`/tools/${menu.slug}`"
+                active-class="!border-emerald-400 !text-emerald-400"
+                class="inline-flex items-center px-3 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 transition h-full gap-1 z-10 relative">
+                {{ $t(menu.labelKey) }}
+                <svg
+                  class="w-4 h-4 text-gray-400 transition-transform duration-200 group-hover:rotate-180"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </NuxtLinkLocale>
 
-            <NuxtLinkLocale
-              to="/tools/image"
-              exact-active-class="!border-emerald-400 !text-emerald-400"
-              class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-emerald-400 hover:border-emerald-400 transition">
-              {{ $t('nav.image_tools') }}
-            </NuxtLinkLocale>
+              <!-- ✅ 巨型下拉面板 -->
+              <!-- w-[600px] 固定宽度，或者根据工具数量动态调整 -->
+              <!-- max-h-[80vh] 限制高度，防止超出屏幕 -->
+              <!-- overflow-y-auto 超出滚动 -->
+              <div
+                class="absolute left-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-20">
+                <div
+                  class="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden ring-1 ring-black ring-opacity-5 w-[500px] lg:w-[600px]">
+                  <!-- 顶部浅色标题栏 (可选) -->
+                  <div class="bg-gray-50 px-5 py-3 border-b border-gray-100 flex justify-between items-center">
+                    <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">{{ $t(menu.labelKey) }}</span>
+                    <span class="text-xs text-gray-400">{{ getToolsByCategory(menu.slug).length }} items</span>
+                  </div>
 
-            <NuxtLinkLocale
-              to="/tools/text"
-              exact-active-class="!border-emerald-400 !text-emerald-400"
-              class="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-emerald-400 hover:border-emerald-400 transition">
-              {{ $t('nav.text_tools') }}
-            </NuxtLinkLocale>
+                  <!-- 工具网格：两列布局 -->
+                  <div class="p-2 grid grid-cols-2 gap-2 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    <NuxtLinkLocale
+                      v-for="tool in getToolsByCategory(menu.slug)"
+                      :key="tool.id"
+                      :to="tool.path"
+                      class="flex items-start gap-3 p-3 rounded-lg hover:bg-emerald-50 transition group/item">
+                      <!-- 图标背景 -->
+                      <div
+                        :class="`w-10 h-10 rounded-lg flex-shrink-0 flex items-center justify-center text-xl bg-white border border-gray-200 group-hover/item:border-emerald-200 group-hover/item:bg-white transition`">
+                        {{ tool.icon }}
+                      </div>
+
+                      <!-- 文本信息 -->
+                      <div class="flex flex-col">
+                        <span class="text-sm font-medium text-gray-800 group-hover/item:text-emerald-700">{{
+                          $t(tool.nameKey)
+                        }}</span>
+                        <span class="text-xs text-gray-500 line-clamp-1 mt-0.5 group-hover/item:text-emerald-600/70">{{
+                          $t(tool.descKey)
+                        }}</span>
+                      </div>
+                    </NuxtLinkLocale>
+
+                    <!-- 空状态 -->
+                    <div
+                      v-if="getToolsByCategory(menu.slug).length === 0"
+                      class="col-span-2 py-8 text-center text-gray-400 italic">
+                      🚧 开发中，敬请期待...
+                    </div>
+                  </div>
+
+                  <!-- 底部 "查看全部" 链接 -->
+                  <div class="bg-gray-50 p-3 text-center border-t border-gray-100">
+                    <NuxtLinkLocale
+                      :to="`/tools/${menu.slug}`"
+                      class="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline">
+                      查看全部 {{ $t(menu.labelKey) }} →
+                    </NuxtLinkLocale>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- 右侧 功能区 -->
+        <!-- 右侧 功能区保持不变 -->
         <div class="flex items-center space-x-3">
-          <!-- 语言切换 (逻辑保持不变，因为这涉及到 switchLocalePath) -->
           <select
             :value="locale"
             @change="onLocaleChanged"
-            class="bg-gray-50 text-xs sm:text-sm border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 py-1">
+            class="bg-gray-50 text-xs sm:text-sm border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 py-1 pl-2 pr-6">
             <option value="zh">🇨🇳 中文</option>
             <option value="en">🇺🇸 EN</option>
           </select>
-
-          <!-- 用户信息 -->
-          <!-- <template v-if="user">
-            <div class="flex items-center gap-2">
-              <div
-                class="h-8 w-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-sm">
-                {{ user.username.charAt(0).toUpperCase() }}
-              </div>
-              <button @click="logout" class="text-sm text-gray-500 hover:text-red-500 transition">
-                <span class="hidden sm:inline">{{ $t('nav.logout') }}</span>
-                <span class="sm:hidden">🚪</span>
-              </button>
-            </div>
-          </template>
-
-          <template v-else>
-
-            <NuxtLinkLocale to="/login" class="text-sm text-gray-600 hover:text-emerald-600 font-medium">
-              {{ $t('nav.login') }}
-            </NuxtLinkLocale>
-            <NuxtLinkLocale
-              to="/register"
-              class="text-sm bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-full transition shadow-sm">
-              {{ $t('nav.register') }}
-            </NuxtLinkLocale>
-          </template> -->
         </div>
       </div>
     </div>
@@ -102,14 +120,40 @@
 </template>
 
 <script setup lang="ts">
-  const { user, logout } = useAuth()
   const { locale } = useI18n()
   const switchLocalePath = useSwitchLocalePath()
+  const { tools } = useTools()
 
-  // 这里不需要 useLocalePath 了，因为模板里全换成了 NuxtLinkLocale
+  const menus = [
+    { slug: 'dev', labelKey: 'nav.dev_tools' },
+    { slug: 'image', labelKey: 'nav.image_tools' },
+    { slug: 'text', labelKey: 'nav.text_tools' },
+    { slug: 'other', labelKey: 'nav.other_tools' }
+  ]
+
+  const getToolsByCategory = (slug: string) => {
+    return tools.filter(t => t.categorySlug === slug)
+  }
 
   const onLocaleChanged = (event: Event) => {
     const target = event.target as HTMLSelectElement
     navigateTo(switchLocalePath(target.value))
   }
 </script>
+
+<style scoped>
+  /* 美化滚动条 */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #e5e7eb;
+    border-radius: 20px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #d1d5db;
+  }
+</style>
