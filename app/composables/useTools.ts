@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-21 15:47:06
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-21 17:46:41
+ * @LastEditTime: 2025-11-22 10:15:37
  * @FilePath: \xiao-nuxt4\app\composables\useTools.ts
  * @Description: 注释
  */
@@ -132,7 +132,7 @@ export const useTools = () => {
       categorySlug: 'dev',
       path: '/tools/dev/hash'
     },
-     {
+    {
       id: 13,
       nameKey: 'pwd.title',
       descKey: 'pwd.desc',
@@ -141,6 +141,96 @@ export const useTools = () => {
       category: 'nav.other_tools',
       categorySlug: 'other', // ✅ 新分类 slug
       path: '/tools/other/password'
+    },
+    {
+      id: 14,
+      nameKey: 'barcode.title',
+      descKey: 'barcode.desc',
+      icon: '🏷️', // 或者 🛒
+      color: 'bg-blue-50 text-blue-600',
+      category: 'nav.image_tools',
+      categorySlug: 'image',
+      path: '/tools/image/barcode'
+    },
+    {
+      id: 15,
+      nameKey: 'shadow.title',
+      descKey: 'shadow.desc',
+      icon: '🌓',
+      color: 'bg-indigo-100 text-indigo-600',
+      category: 'nav.image_tools',
+      categorySlug: 'image',
+      path: '/tools/image/shadow'
+    },
+    {
+      id: 16,
+      nameKey: 'jwt.title',
+      descKey: 'jwt.desc',
+      icon: '🛡️',
+      color: 'bg-violet-100 text-violet-600',
+      category: 'nav.dev_tools',
+      categorySlug: 'dev',
+      path: '/tools/dev/jwt'
+    },
+    {
+      id: 17,
+      nameKey: 'svgpath.title',
+      descKey: 'svgpath.desc',
+      icon: '✒️',
+      color: 'bg-rose-100 text-rose-600',
+      category: 'nav.image_tools',
+      categorySlug: 'image',
+      path: '/tools/image/svgpath'
+    },
+    {
+      id: 18,
+      nameKey: 'svg_edit.title',
+      descKey: 'svg_edit.desc',
+      icon: '🎨',
+      color: 'bg-orange-100 text-orange-600',
+      category: 'nav.image_tools',
+      categorySlug: 'image',
+      path: '/tools/image/svgedit'
+    },
+    {
+      id: 19,
+      nameKey: 'watermark.title',
+      descKey: 'watermark.desc',
+      icon: '🛡️',
+      color: 'bg-cyan-100 text-cyan-600',
+      category: 'nav.image_tools',
+      categorySlug: 'image',
+      path: '/tools/image/watermark'
+    },
+    {
+      id: 20,
+      nameKey: 'converter.title',
+      descKey: 'converter.desc',
+      icon: '🔄',
+      color: 'bg-teal-100 text-teal-600',
+      category: 'nav.dev_tools',
+      categorySlug: 'dev',
+      path: '/tools/dev/converter'
+    },
+    {
+      id: 21,
+      nameKey: 'http.title',
+      descKey: 'http.desc',
+      icon: '🚀', // 或者 🌐
+      color: 'bg-blue-100 text-blue-600',
+      category: 'nav.other_tools',
+      categorySlug: 'other',
+      path: '/tools/other/http'
+    },
+    {
+      id: 22,
+      nameKey: 'mock.title',
+      descKey: 'mock.desc',
+      icon: '🎲',
+      color: 'bg-fuchsia-100 text-fuchsia-600',
+      category: 'nav.dev_tools',
+      categorySlug: 'dev',
+      path: '/tools/dev/mock'
     }
   ]
 

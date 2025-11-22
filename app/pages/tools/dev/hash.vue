@@ -123,7 +123,7 @@
   import CryptoJS from 'crypto-js'
 
   const { t } = useI18n()
-
+  const { copyToClipboard } = useCopy()
   const input = ref('')
   const isUppercase = ref(false)
   const isHmac = ref(false)
@@ -163,7 +163,7 @@
   const handleCopy = (text: string, type: string) => {
     if (!text) return
 
-    navigator.clipboard.writeText(text)
+    copyToClipboard(text, false)
 
     // 设置当前复制的类型，触发 UI 变化
     copiedType.value = type
@@ -176,16 +176,6 @@
   // 修正后的 copy 逻辑，配合模板里的 copy(text, type) -- 需要修改模板传参
   // 实际上上面的模板我写的是 copy(formatResult(res))，这有点难定位是哪个按钮。
   // 让我们优化一下模板里的按钮点击事件：
-
-  // ✅ 最终逻辑：
-  // 模板：@click="copy(formatResult(res), type)"
-  // 函数：
-  const copyAction = (text: string, type: string) => {
-    if (!text) return
-    navigator.clipboard.writeText(text)
-    copiedKey.value = type
-    setTimeout(() => (copiedKey.value = null), 1500)
-  }
 
   useHead({ title: t('hash.title') + ' - NuxtTools' })
 </script>

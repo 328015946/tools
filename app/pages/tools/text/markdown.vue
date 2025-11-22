@@ -75,7 +75,7 @@
 <script setup lang="ts">
   import { marked } from 'marked'
   import DOMPurify from 'dompurify'
-
+  const { copyToClipboard } = useCopy()
   const { t } = useI18n()
 
   // 状态
@@ -99,8 +99,7 @@
   }
 
   const copyHtml = () => {
-    navigator.clipboard.writeText(htmlContent.value)
-    alert('HTML copied!')
+    copyToClipboard(htmlContent.value)
   }
 
   // SEO

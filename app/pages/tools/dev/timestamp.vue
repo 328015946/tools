@@ -135,7 +135,7 @@
 
 <script setup lang="ts">
   import dayjs from 'dayjs'
-
+  const { copyToClipboard } = useCopy()
   const { t } = useI18n()
 
   // -----------------------------------
@@ -228,9 +228,8 @@
   // -----------------------------------
   const copy = (text: string) => {
     if (text && text !== '-') {
-      navigator.clipboard.writeText(text)
       // 可以加个 Toast 提示，这里简单处理
-      alert(t('time.copied'))
+      copyToClipboard(text)
     }
   }
 
