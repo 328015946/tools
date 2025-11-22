@@ -105,14 +105,47 @@
         </div>
 
         <!-- 右侧 功能区保持不变 -->
+        <!-- 右侧 功能区 -->
         <div class="flex items-center space-x-3">
-          <select
-            :value="locale"
-            @change="onLocaleChanged"
-            class="bg-gray-50 text-xs sm:text-sm border-gray-300 rounded-md focus:border-emerald-500 focus:ring-emerald-500 py-1 pl-2 pr-6">
-            <option value="zh">🇨🇳 中文</option>
-            <option value="en">🇺🇸 EN</option>
-          </select>
+          <!-- ✅ 自定义语言切换菜单 -->
+          <div class="relative group py-4">
+            <!-- 加 py-4 是为了增加 hover 热区，防止鼠标移动时菜单消失 -->
+
+            <!-- 1. 触发按钮 -->
+            <button
+              class="flex items-center gap-2 px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-full transition-colors focus:outline-none">
+              <span>{{ currentLang.flag }}</span>
+              <span>{{ currentLang.label }}</span>
+              <!-- 小箭头 -->
+              <svg
+                class="w-3 h-3 text-gray-400 transition-transform duration-200 group-hover:rotate-180"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <!-- 2. 下拉面板 -->
+            <!-- absolute right-0 保证靠右对齐 -->
+            <div
+              class="absolute right-0 top-full mt-[-10px] w-32 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50 pt-2">
+              <div
+                class="bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden ring-1 ring-black ring-opacity-5 py-1">
+                <button
+                  v-for="opt in langOptions"
+                  :key="opt.code"
+                  @click="changeLang(opt.code)"
+                  class="w-full text-left px-4 py-2.5 text-sm flex items-center gap-3 hover:bg-emerald-50 transition"
+                  :class="locale === opt.code ? 'text-emerald-600 font-bold bg-emerald-50/50' : 'text-gray-600'">
+                  <span class="text-base">{{ opt.flag }}</span>
+                  <span>{{ opt.label }}</span>
+                  <!-- 选中的打钩 -->
+                  <span v-if="locale === opt.code" class="ml-auto text-emerald-500">✓</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -130,14 +163,24 @@
     { slug: 'text', labelKey: 'nav.text_tools' },
     { slug: 'other', labelKey: 'nav.other_tools' }
   ]
+  // 语言选项配置
+  const langOptions = [
+    { code: 'zh', label: '中文', flag: '🇨🇳' },
+    { code: 'en', label: 'English', flag: '🇺🇸' }
+  ]
+  // 当前显示的语言对象
+  const currentLang = computed(() => {
+    return langOptions.find(l => l.code === locale.value) || langOptions[0]
+  })
 
   const getToolsByCategory = (slug: string) => {
     return tools.filter(t => t.categorySlug === slug)
   }
 
-  const onLocaleChanged = (event: Event) => {
-    const target = event.target as HTMLSelectElement
-    navigateTo(switchLocalePath(target.value))
+  const changeLang = (code: string) => {
+    if (code !== locale.value) {
+      navigateTo(switchLocalePath(code))
+    }
   }
 </script>
 

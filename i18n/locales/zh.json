@@ -21,9 +21,9 @@
     "search_placeholder": "搜索工具 (例如: JSON, 图片...)",
     "recent_tools": "最近使用",
     "all_tools": "所有工具",
-    "category": "分类",
-    "popular": "热门",
-    "no_result": "没有找到相关工具"
+    "no_result": "未找到相关工具",
+    "no_result_desc": "当前分类下没找到相关工具，试着切换分类或修改关键词。",
+    "view_all": "查看所有工具"
   },
   "tools": {
     "json_fmt": "JSON 格式化",
@@ -358,5 +358,125 @@
       "city": "城市",
       "ip": "IP 地址"
     }
+  },
+  "sql": {
+    "title": "SQL 格式化",
+    "desc": "在线美化 SQL 语句，支持多种数据库方言",
+    "input_label": "输入 SQL",
+    "output_label": "美化结果",
+    "dialect": "数据库方言",
+    "format": "格式化",
+    "minify": "压缩 (Minify)",
+    "clear": "清空",
+    "copy": "复制",
+    "error": "SQL 语法错误"
+  },
+  "regex": {
+    "title": "正则表达式测试",
+    "desc": "在线测试正则表达式匹配，支持实时高亮",
+    "regex_label": "正则表达式",
+    "flags": "修饰符 (Flags)",
+    "text_label": "测试文本",
+    "match_result": "匹配结果",
+    "no_match": "无匹配内容",
+    "error": "正则表达式语法错误",
+    "count": "找到 {n} 处匹配"
+  },
+  "gradient": {
+    "title": "CSS 渐变生成器",
+    "desc": "可视化创建线性/径向渐变背景",
+    "type": "类型",
+    "linear": "线性 (Linear)",
+    "radial": "径向 (Radial)",
+    "angle": "角度 (deg)",
+    "stops": "颜色断点",
+    "add_stop": "添加颜色",
+    "css_code": "CSS 代码",
+    "copy": "复制 CSS"
+  },
+  "base": {
+    "title": "进制转换器",
+    "desc": "二进制、八进制、十进制、十六进制实时互转",
+    "bin": "二进制 (Binary)",
+    "oct": "八进制 (Octal)",
+    "dec": "十进制 (Decimal)",
+    "hex": "十六进制 (Hex)",
+    "copy": "复制",
+    "error": "输入格式错误"
+  },
+  "screen": {
+    "title": "屏幕尺寸查询",
+    "desc": "主流手机、平板、显示器的逻辑分辨率速查",
+    "search": "搜索机型...",
+    "device": "设备名称",
+    "logic": "逻辑分辨率 (pt)",
+    "physical": "物理分辨率 (px)",
+    "density": "倍率",
+    "size": "尺寸 (inch)"
+  },
+  "social": {
+    "title": "社交媒体预览",
+    "desc": "预览链接在 Twitter/Facebook/微信 中的分享卡片样式",
+    "title_label": "标题",
+    "desc_label": "描述",
+    "image_label": "封面图",
+    "upload": "上传图片",
+    "twitter": "Twitter Card",
+    "facebook": "Facebook / 微信",
+    "google": "Google Search"
+  },
+  "palette": {
+    "title": "配色方案生成",
+    "desc": "从图片提取配色，或随机生成协调色盘",
+    "extract": "从图片提取",
+    "random": "随机生成",
+    "upload_tip": "拖拽图片到这里",
+    "copy": "复制 HEX"
+  },
+  "joiner": {
+    "title": "图片拼接 (长图)",
+    "desc": "将多张图片拼接为一张长图，支持横向/纵向",
+    "direction": "拼接方向",
+    "vertical": "纵向 (竖排)",
+    "horizontal": "横向 (横排)",
+    "gap": "间距",
+    "bg_color": "背景色",
+    "add_images": "添加图片",
+    "download": "下载拼接图",
+    "clear": "清空"
+  },
+  "placeholder": {
+    "title": "占位图生成",
+    "desc": "快速生成 UI 设计所需的占位图片链接",
+    "width": "宽度",
+    "height": "高度",
+    "bg_color": "背景色",
+    "text_color": "文字色",
+    "text": "文字内容",
+    "format": "格式",
+    "copy_url": "复制 URL",
+    "download": "下载图片"
+  },
+  "mermaid": {
+    "title": "Mermaid 流程图",
+    "desc": "使用文本代码绘制流程图、时序图、甘特图等",
+    "input_label": "Mermaid 代码",
+    "preview": "实时预览",
+    "examples": "示例模板",
+    "flowchart": "流程图",
+    "sequence": "时序图",
+    "class": "类图",
+    "state": "状态图",
+    "gantt": "甘特图",
+    "pie": "饼图",
+    "download_svg": "下载 SVG",
+    "download_png": "下载 PNG",
+    "error": "语法错误：无法渲染"
+  },
+  "editor": {
+    "title": "全能图片编辑器",
+    "desc": "在线编辑图片：裁剪、滤镜、添加文字、图形标注",
+    "load_image": "上传图片",
+    "download": "保存下载"
   }
 }

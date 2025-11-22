@@ -21,9 +21,9 @@
     "search_placeholder": "Search tools (e.g. JSON, Image...)",
     "recent_tools": "Recently Used",
     "all_tools": "All Tools",
-    "category": "Category",
-    "popular": "Popular",
-    "no_result": "No tools found"
+    "no_result": "No tools found",
+    "no_result_desc": "No tools found in current category. Try switching category or keyword.",
+    "view_all": "View All Tools"
   },
   "tools": {
     "json_fmt": "JSON Formatter",
@@ -358,5 +358,125 @@
       "city": "City",
       "ip": "IP Address"
     }
+  },
+  "sql": {
+    "title": "SQL Formatter",
+    "desc": "Beautify SQL queries online, supports multiple dialects",
+    "input_label": "Input SQL",
+    "output_label": "Result",
+    "dialect": "Dialect",
+    "format": "Format",
+    "minify": "Minify",
+    "clear": "Clear",
+    "copy": "Copy",
+    "error": "SQL Syntax Error"
+  },
+  "regex": {
+    "title": "Regex Tester",
+    "desc": "Test regular expressions online with real-time highlighting",
+    "regex_label": "Regular Expression",
+    "flags": "Flags",
+    "text_label": "Test String",
+    "match_result": "Match Result",
+    "no_match": "No matches found",
+    "error": "Invalid Regular Expression",
+    "count": "{n} matches found"
+  },
+  "gradient": {
+    "title": "CSS Gradient Generator",
+    "desc": "Create linear/radial gradients visually",
+    "type": "Type",
+    "linear": "Linear",
+    "radial": "Radial",
+    "angle": "Angle (deg)",
+    "stops": "Color Stops",
+    "add_stop": "Add Stop",
+    "css_code": "CSS Code",
+    "copy": "Copy CSS"
+  },
+  "base": {
+    "title": "Base Converter",
+    "desc": "Convert between Binary, Octal, Decimal, and Hex",
+    "bin": "Binary (2)",
+    "oct": "Octal (8)",
+    "dec": "Decimal (10)",
+    "hex": "Hexadecimal (16)",
+    "copy": "Copy",
+    "error": "Invalid Input"
+  },
+  "screen": {
+    "title": "Screen Size Map",
+    "desc": "Viewport sizes & pixel densities for popular devices",
+    "search": "Search device...",
+    "device": "Device Name",
+    "logic": "Viewport (pt)",
+    "physical": "Physical (px)",
+    "density": "Density",
+    "size": "Size (inch)"
+  },
+  "social": {
+    "title": "Social Media Preview",
+    "desc": "Preview how your content looks on social platforms",
+    "title_label": "Title",
+    "desc_label": "Description",
+    "image_label": "Cover Image",
+    "upload": "Upload Image",
+    "twitter": "Twitter Card",
+    "facebook": "Facebook / WeChat",
+    "google": "Google Search"
+  },
+  "palette": {
+    "title": "Color Palette",
+    "desc": "Generate color schemes or extract from images",
+    "extract": "Extract from Image",
+    "random": "Random Generate",
+    "upload_tip": "Drop image here",
+    "copy": "Copy HEX"
+  },
+  "joiner": {
+    "title": "Image Joiner",
+    "desc": "Merge multiple images into one long picture",
+    "direction": "Direction",
+    "vertical": "Vertical",
+    "horizontal": "Horizontal",
+    "gap": "Gap",
+    "bg_color": "Background",
+    "add_images": "Add Images",
+    "download": "Download",
+    "clear": "Clear"
+  },
+  "placeholder": {
+    "title": "Placeholder Image",
+    "desc": "Generate dummy images for UI design",
+    "width": "Width",
+    "height": "Height",
+    "bg_color": "Background",
+    "text_color": "Text Color",
+    "text": "Text",
+    "format": "Format",
+    "copy_url": "Copy URL",
+    "download": "Download"
+  },
+  "mermaid": {
+    "title": "Mermaid Live Editor",
+    "desc": "Generate Flowcharts, Sequence Diagrams, Gantt Charts from text",
+    "input_label": "Mermaid Code",
+    "preview": "Preview",
+    "examples": "Examples",
+    "flowchart": "Flowchart",
+    "sequence": "Sequence",
+    "class": "Class",
+    "state": "State",
+    "gantt": "Gantt",
+    "pie": "Pie",
+    "download_svg": "Download SVG",
+    "download_png": "Download PNG",
+    "error": "Syntax Error"
+  },
+  "editor": {
+    "title": "Photo Editor Pro",
+    "desc": "Edit photos online: Crop, Filter, Text, Shapes",
+    "load_image": "Load Image",
+    "download": "Save & Download"
   }
 }
