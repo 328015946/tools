@@ -16,6 +16,7 @@
     "@types/dompurify": "^3.0.5",
     "@types/marked": "^5.0.2",
     "browser-image-compression": "^2.0.2",
+    "change-case": "^5.4.4",
     "colorthief": "^2.6.0",
     "crypto-js": "^4.2.0",
     "curlconverter": "^4.12.0",

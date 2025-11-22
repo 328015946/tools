@@ -39,7 +39,8 @@
     if (slug === 'dev') return t('nav.dev_tools')
     if (slug === 'image') return t('nav.image_tools')
     if (slug === 'text') return t('nav.text_tools')
-     if (slug === 'other') return t('nav.other_tools') // ✅ 新增
+    if (slug === 'docs') return t('nav.docs_tools')
+    if (slug === 'other') return t('nav.other_tools') // ✅ 新增
     return 'Unknown Category'
   })
 

@@ -161,6 +161,7 @@
     { slug: 'dev', labelKey: 'nav.dev_tools' },
     { slug: 'image', labelKey: 'nav.image_tools' },
     { slug: 'text', labelKey: 'nav.text_tools' },
+    { slug: 'docs', labelKey: 'nav.docs_tools' }, // ✅ 新增
     { slug: 'other', labelKey: 'nav.other_tools' }
   ]
   // 语言选项配置

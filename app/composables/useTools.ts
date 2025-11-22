@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-21 15:47:06
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-22 14:41:49
+ * @LastEditTime: 2025-11-22 15:08:28
  * @FilePath: \xiao-nuxt4\app\composables\useTools.ts
  * @Description: 注释
  */
@@ -348,6 +348,70 @@ export const useTools = () => {
       category: 'nav.image_tools',
       categorySlug: 'image',
       path: '/tools/image/editor'
+    },
+    // 新增分类: docs
+    {
+      id: 34,
+      nameKey: 'cheatsheet.git_title',
+      descKey: 'cheatsheet.git_desc',
+      icon: '🌳',
+      color: 'bg-orange-50 text-orange-600',
+      category: 'nav.docs_tools',
+      categorySlug: 'docs',
+      path: '/tools/docs/git'
+    },
+    {
+      id: 35,
+      nameKey: 'cheatsheet.linux_title',
+      descKey: 'cheatsheet.linux_desc',
+      icon: '🐧',
+      color: 'bg-slate-100 text-slate-700',
+      category: 'nav.docs_tools',
+      categorySlug: 'docs',
+      path: '/tools/docs/linux'
+    },
+    {
+      id: 36,
+      nameKey: 'cheatsheet.http_title',
+      descKey: 'cheatsheet.http_desc',
+      icon: '🌐',
+      color: 'bg-blue-50 text-blue-600',
+      category: 'nav.docs_tools',
+      categorySlug: 'docs',
+      path: '/tools/docs/http'
+    },
+    // 新增: 大小写 (Text)
+    {
+      id: 37,
+      nameKey: 'case.title',
+      descKey: 'case.desc',
+      icon: '🔠',
+      color: 'bg-green-100 text-green-600',
+      category: 'nav.text_tools',
+      categorySlug: 'text',
+      path: '/tools/text/case'
+    },
+    // 新增: 列表处理 (Text)
+    {
+      id: 38,
+      nameKey: 'filter.title',
+      descKey: 'filter.desc',
+      icon: '🧹',
+      color: 'bg-amber-100 text-amber-600',
+      category: 'nav.text_tools',
+      categorySlug: 'text',
+      path: '/tools/text/filter'
+    },
+    // 新增: 随机字符串 (Text)
+    {
+      id: 39,
+      nameKey: 'randstr.title',
+      descKey: 'randstr.desc',
+      icon: '🎲',
+      color: 'bg-cyan-100 text-cyan-600',
+      category: 'nav.text_tools',
+      categorySlug: 'text',
+      path: '/tools/text/randstr'
     }
   ]
 
