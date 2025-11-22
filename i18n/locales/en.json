@@ -300,7 +300,7 @@
   },
   "converter": {
     "title": "Data & Code Converter",
-    "desc": "JSON to C#/Java Entity, XML <-> JSON Converter",
+    "desc": "JSON to C#/Java Entity, XML {'<'}->{'>'} JSON Converter",
     "input_label": "Input Data",
     "output_label": "Output Result",
     "mode": "Conversion Mode",
