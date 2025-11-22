@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-21 15:47:06
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-22 15:08:28
+ * @LastEditTime: 2025-11-22 16:22:29
  * @FilePath: \xiao-nuxt4\app\composables\useTools.ts
  * @Description: 注释
  */
@@ -412,6 +412,80 @@ export const useTools = () => {
       category: 'nav.text_tools',
       categorySlug: 'text',
       path: '/tools/text/randstr'
+    },
+    // 43. Docker
+    {
+      id: 40,
+      nameKey: 'cheatsheet.docker_title',
+      descKey: 'cheatsheet.docker_desc',
+      icon: '🐳',
+      color: 'bg-sky-50 text-sky-600',
+      category: 'nav.docs_tools',
+      categorySlug: 'docs',
+      path: '/tools/docs/docker'
+    },
+    // 44. SQL
+    {
+      id: 41,
+      nameKey: 'cheatsheet.sql_title',
+      descKey: 'cheatsheet.sql_desc',
+      icon: '💾',
+      color: 'bg-blue-50 text-blue-700',
+      category: 'nav.docs_tools',
+      categorySlug: 'docs',
+      path: '/tools/docs/sql'
+    },
+    // 45. Vim
+    {
+      id: 42,
+      nameKey: 'cheatsheet.vim_title',
+      descKey: 'cheatsheet.vim_desc',
+      icon: '📟',
+      color: 'bg-green-50 text-green-700',
+      category: 'nav.docs_tools',
+      categorySlug: 'docs',
+      path: '/tools/docs/vim'
+    },
+    // 46. Ports
+    {
+      id: 43,
+      nameKey: 'cheatsheet.port_title',
+      descKey: 'cheatsheet.port_desc',
+      icon: '🔌',
+      color: 'bg-gray-100 text-gray-600',
+      category: 'nav.docs_tools',
+      categorySlug: 'docs',
+      path: '/tools/docs/port'
+    },
+    {
+      id: 44,
+      nameKey: 'chart.title',
+      descKey: 'chart.desc',
+      icon: '📊',
+      color: 'bg-orange-100 text-orange-600',
+      category: 'nav.image_tools',
+      categorySlug: 'image',
+      path: '/tools/image/chart'
+    },
+    {
+      id: 45,
+      nameKey: 'currency.title',
+      descKey: 'currency.desc',
+      icon: '💱',
+      color: 'bg-green-50 text-green-600',
+      category: 'nav.other_tools',
+      categorySlug: 'other',
+      path: '/tools/other/currency'
+    },
+    {
+      id: 46,
+      nameKey: 'hanzi.title',
+      descKey: 'hanzi.desc',
+      icon: '✍️',
+      color: 'bg-red-50 text-red-600', // 红色系，因为是中国风
+      category: 'nav.other_tools',
+      categorySlug: 'other',
+      path: '/tools/other/hanzi'
     }
   ]
 

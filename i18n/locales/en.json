@@ -489,7 +489,15 @@
     "http_desc": "HTTP response status codes reference",
     "search": "Search...",
     "copy": "Copy",
-    "copied": "Copied"
+    "copied": "Copied",
+    "docker_title": "Docker Cheatsheet",
+    "docker_desc": "Essential Docker commands: images, containers, logs",
+    "sql_title": "SQL Cheat Sheet",
+    "sql_desc": "CRUD operations, JOINs, Table creation syntax",
+    "vim_title": "Vim Cheat Sheet",
+    "vim_desc": "Vim shortcuts: modes, navigation, editing, saving",
+    "port_title": "Common Ports",
+    "port_desc": "Default ports for common services (MySQL, Redis...)"
   },
   "cheatsheet_data": {
     "git": {
@@ -565,6 +573,68 @@
       "desc_500": "Generic server error",
       "desc_502": "Upstream server invalid response",
       "desc_503": "Server overloaded or maintenance"
+    },
+    "docker": {
+      "cat_image": "Images",
+      "desc_build": "Build an image from Dockerfile",
+      "desc_pull": "Pull an image from a registry",
+      "desc_ls": "List local images",
+      "desc_rmi": "Remove one or more images",
+      "cat_container": "Containers",
+      "desc_run": "Run a command in a new container",
+      "desc_ps": "List running containers",
+      "desc_logs": "Fetch the logs of a container",
+      "desc_exec": "Run a command in a running container",
+      "cat_clean": "System & Prune",
+      "desc_prune": "Remove unused data",
+      "desc_stats": "Display stream of resource usage"
+    },
+    "sql": {
+      "cat_ddl": "Data Definition (DDL)",
+      "desc_create": "Create a new table",
+      "desc_drop": "Delete a table",
+      "desc_alter": "Modify a table",
+      "cat_dml": "Data Manipulation (DML)",
+      "desc_select": "Query data",
+      "desc_insert": "Insert data",
+      "desc_update": "Update data",
+      "desc_delete": "Delete data",
+      "cat_join": "Joins",
+      "desc_left": "Left Join",
+      "desc_inner": "Inner Join"
+    },
+    "vim": {
+      "cat_mode": "Modes",
+      "desc_i": "Insert mode",
+      "desc_esc": "Exit insert mode",
+      "desc_v": "Visual mode",
+      "cat_nav": "Navigation",
+      "desc_gg": "Go to first line",
+      "desc_G": "Go to last line",
+      "desc_0": "Go to start of line",
+      "desc_dollar": "Go to end of line ($)",
+      "cat_edit": "Editing",
+      "desc_dd": "Delete (cut) line",
+      "desc_yy": "Yank (copy) line",
+      "desc_p": "Paste",
+      "desc_u": "Undo",
+      "desc_wq": "Write and Quit"
+    },
+    "port": {
+      "cat_system": "System Services",
+      "desc_21": "FTP",
+      "desc_22": "SSH",
+      "desc_25": "SMTP",
+      "desc_53": "DNS",
+      "desc_80": "HTTP",
+      "desc_443": "HTTPS",
+      "cat_db": "Databases",
+      "desc_3306": "MySQL",
+      "desc_5432": "PostgreSQL",
+      "desc_6379": "Redis",
+      "desc_27017": "MongoDB",
+      "desc_9200": "Elasticsearch",
+      "desc_8080": "Tomcat / Web Proxy"
     }
   },
   "case": {
@@ -606,5 +676,60 @@
     "type_mix": "Mixed",
     "generate": "Generate",
     "result": "Result"
+  },
+  "chart": {
+    "title": "Chart Generator",
+    "desc": "Create statistical charts visually (Bar, Pie, Line, etc.)",
+    "config_title": "Settings",
+    "chart_title": "Chart Title",
+    "chart_type": "Chart Type",
+    "types": {
+      "bar": "Bar Chart",
+      "line": "Line Chart",
+      "pie": "Pie Chart",
+      "doughnut": "Doughnut Chart",
+      "polarArea": "Polar Area"
+    },
+    "data_config": "Data Entry",
+    "label": "Label",
+    "value": "Value",
+    "color": "Color",
+    "add_row": "Add Data Row",
+    "download": "Download Chart"
+  },
+  "currency": {
+    "title": "Currency Converter",
+    "desc": "Real-time exchange rates conversion (Source: ECB)",
+    "amount": "Amount",
+    "from": "From",
+    "to": "To",
+    "result": "Result",
+    "rate": "Rate",
+    "update_time": "Last Updated",
+    "swap": "Swap",
+    "error": "Failed to fetch rates",
+    "cny": "Chinese Yuan (CNY)",
+    "usd": "US Dollar (USD)",
+    "eur": "Euro (EUR)",
+    "jpy": "Japanese Yen (JPY)",
+    "hkd": "Hong Kong Dollar (HKD)",
+    "gbp": "British Pound (GBP)",
+    "aud": "Australian Dollar (AUD)",
+    "cad": "Canadian Dollar (CAD)",
+    "krw": "South Korean Won (KRW)",
+    "thb": "Thai Baht (THB)"
+  },
+  "hanzi": {
+    "title": "Hanzi Stroke Order",
+    "desc": "Chinese character stroke order animation & practice grid",
+    "input_label": "Input Hanzi",
+    "placeholder": "Enter Chinese characters...",
+    "animate": "Animate",
+    "show_outline": "Show Outline",
+    "show_order": "Show Order",
+    "color": "Stroke Color",
+    "speed": "Speed",
+    "download": "Download Image",
+    "loading": "Loading font..."
   }
 }

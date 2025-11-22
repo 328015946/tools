@@ -20,12 +20,12 @@
           <!-- 桌面端主导航 -->
           <div class="hidden sm:ml-8 sm:flex sm:space-x-2">
             <!-- 1. 首页 -->
-            <NuxtLinkLocale
+            <!-- <NuxtLinkLocale
               to="/"
               active-class="!border-emerald-400 !text-emerald-400"
               class="inline-flex items-center px-3 pt-1 text-sm font-medium text-gray-500 border-b-2 border-transparent hover:text-gray-700 hover:border-gray-300 transition h-full">
               {{ $t('nav.home') }}
-            </NuxtLinkLocale>
+            </NuxtLinkLocale> -->
 
             <!-- 2. 分类菜单 (Mega Menu) -->
             <div v-for="menu in menus" :key="menu.slug" class="relative group h-full flex items-center">

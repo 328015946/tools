@@ -489,7 +489,15 @@
     "http_desc": "HTTP 响应状态码含义查询 (200, 404, 502...)",
     "search": "搜索命令/说明...",
     "copy": "复制",
-    "copied": "已复制"
+    "copied": "已复制",
+    "docker_title": "Docker 命令速查",
+    "docker_desc": "容器化常用命令：镜像、容器、日志、清理",
+    "sql_title": "SQL 常用语句",
+    "sql_desc": "增删改查 (CRUD)、连接 (JOIN)、建表语法",
+    "vim_title": "Vim 快捷键",
+    "vim_desc": "Vim 编辑器常用指令：模式切换、移动、编辑、保存",
+    "port_title": "常用端口对照表",
+    "port_desc": "常见服务默认端口号清单 (MySQL, Redis, SSH...)"
   },
   "cheatsheet_data": {
     "git": {
@@ -565,6 +573,68 @@
       "desc_500": "服务器内部错误",
       "desc_502": "网关错误 (上游服务无效响应)",
       "desc_503": "服务不可用 (超载或维护)"
+    },
+    "docker": {
+      "cat_image": "镜像管理 (Images)",
+      "desc_build": "从 Dockerfile 构建镜像",
+      "desc_pull": "从仓库拉取镜像",
+      "desc_ls": "列出本地镜像",
+      "desc_rmi": "删除镜像",
+      "cat_container": "容器操作 (Containers)",
+      "desc_run": "创建并启动容器",
+      "desc_ps": "查看运行中的容器",
+      "desc_logs": "查看容器日志",
+      "desc_exec": "进入容器执行命令",
+      "cat_clean": "清理与系统",
+      "desc_prune": "清理所有未使用的资源 (慎用)",
+      "desc_stats": "查看容器资源占用"
+    },
+    "sql": {
+      "cat_ddl": "数据定义 (DDL)",
+      "desc_create": "创建新表",
+      "desc_drop": "删除表",
+      "desc_alter": "修改表结构",
+      "cat_dml": "数据操作 (DML)",
+      "desc_select": "查询数据",
+      "desc_insert": "插入数据",
+      "desc_update": "更新数据",
+      "desc_delete": "删除数据",
+      "cat_join": "连接查询 (JOIN)",
+      "desc_left": "左连接 (返回左表所有记录)",
+      "desc_inner": "内连接 (返回匹配记录)"
+    },
+    "vim": {
+      "cat_mode": "模式切换",
+      "desc_i": "进入插入模式 (Insert)",
+      "desc_esc": "退出插入模式，回普通模式",
+      "desc_v": "进入可视模式 (选择文本)",
+      "cat_nav": "光标移动",
+      "desc_gg": "跳到文件首行",
+      "desc_G": "跳到文件末尾",
+      "desc_0": "跳到行首",
+      "desc_dollar": "跳到行尾 ($)",
+      "cat_edit": "编辑与保存",
+      "desc_dd": "删除(剪切)当前行",
+      "desc_yy": "复制当前行",
+      "desc_p": "粘贴",
+      "desc_u": "撤销 (Undo)",
+      "desc_wq": "保存并退出"
+    },
+    "port": {
+      "cat_system": "系统/网络服务",
+      "desc_21": "FTP 文件传输",
+      "desc_22": "SSH 远程登录",
+      "desc_25": "SMTP 邮件发送",
+      "desc_53": "DNS 域名解析",
+      "desc_80": "HTTP 网页服务",
+      "desc_443": "HTTPS 加密网页",
+      "cat_db": "数据库/中间件",
+      "desc_3306": "MySQL",
+      "desc_5432": "PostgreSQL",
+      "desc_6379": "Redis",
+      "desc_27017": "MongoDB",
+      "desc_9200": "Elasticsearch",
+      "desc_8080": "Tomcat / 常用 Web 代理"
     }
   },
   "case": {
@@ -606,5 +676,60 @@
     "type_mix": "混合 (数字+字母)",
     "generate": "生成",
     "result": "生成结果"
+  },
+  "chart": {
+    "title": "在线图表生成器",
+    "desc": "可视化制作统计图表，支持柱状图、饼图、折线图等",
+    "config_title": "图表设置",
+    "chart_title": "图表标题",
+    "chart_type": "图表类型",
+    "types": {
+      "bar": "柱状图 (Bar)",
+      "line": "折线图 (Line)",
+      "pie": "饼图 (Pie)",
+      "doughnut": "环形图 (Doughnut)",
+      "polarArea": "极坐标 (Polar)"
+    },
+    "data_config": "数据录入",
+    "label": "名称 (X轴)",
+    "value": "数值 (Y轴)",
+    "color": "颜色",
+    "add_row": "添加数据",
+    "download": "下载图表"
+  },
+  "currency": {
+    "title": "汇率换算",
+    "desc": "实时查询全球常用货币汇率 (数据源: 欧洲央行)",
+    "amount": "金额",
+    "from": "持有货币",
+    "to": "目标货币",
+    "result": "换算结果",
+    "rate": "当前汇率",
+    "update_time": "更新时间",
+    "swap": "交换",
+    "error": "获取汇率失败，请稍后重试",
+    "cny": "人民币 (CNY)",
+    "usd": "美元 (USD)",
+    "eur": "欧元 (EUR)",
+    "jpy": "日元 (JPY)",
+    "hkd": "港币 (HKD)",
+    "gbp": "英镑 (GBP)",
+    "aud": "澳元 (AUD)",
+    "cad": "加元 (CAD)",
+    "krw": "韩元 (KRW)",
+    "thb": "泰铢 (THB)"
+  },
+  "hanzi": {
+    "title": "汉字笔顺动画",
+    "desc": "在线生成汉字田字格，演示笔画顺序",
+    "input_label": "输入汉字",
+    "placeholder": "输入单个或多个汉字...",
+    "animate": "播放动画",
+    "show_outline": "显示轮廓",
+    "show_order": "显示笔顺编号",
+    "color": "笔画颜色",
+    "speed": "书写速度",
+    "download": "下载图片",
+    "loading": "加载字库中..."
   }
 }
