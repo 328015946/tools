@@ -731,5 +731,63 @@
     "speed": "书写速度",
     "download": "下载图片",
     "loading": "加载字库中..."
+  },
+  "snippets": {
+    "title": "CSS 代码片段库",
+    "desc": "汇集高频使用的 CSS 布局、文本效果和 UI 组件代码生成器。",
+    "items": {
+      "triangle": {
+        "title": "纯 CSS 三角形",
+        "desc": "使用 Border 生成三角形"
+      },
+      "circle": {
+        "title": "完美圆形",
+        "desc": "正圆或胶囊形状"
+      },
+      "flex_center": {
+        "title": "Flex 居中",
+        "desc": "万能的绝对居中布局"
+      },
+      "grid_center": {
+        "title": "Grid 居中",
+        "desc": "最简短的居中写法 (place-items)"
+      },
+      "aspect_ratio": {
+        "title": "固定宽高比",
+        "desc": "保持容器比例 (如 16:9)"
+      },
+      "text_truncate": {
+        "title": "单行截断",
+        "desc": "超出部分显示省略号"
+      },
+      "line_clamp": {
+        "title": "多行截断",
+        "desc": "限制显示行数 (Webkit)"
+      },
+      "gradient_text": {
+        "title": "文字渐变",
+        "desc": "背景裁剪实现的文字渐变色"
+      },
+      "vertical_text": {
+        "title": "竖排文字",
+        "desc": "适合古风或中文排版"
+      },
+      "custom_scrollbar": {
+        "title": "自定义滚动条",
+        "desc": "美化浏览器默认滚动条"
+      },
+      "glassmorphism": {
+        "title": "毛玻璃效果",
+        "desc": "流行的背景模糊风格"
+      },
+      "img_gray": {
+        "title": "图片黑白化",
+        "desc": "网页哀悼模式或特殊效果"
+      },
+      "no_select": {
+        "title": "禁止选中",
+        "desc": "防止用户复制文本"
+      }
+    }
   }
 }

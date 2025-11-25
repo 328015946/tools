@@ -486,6 +486,16 @@ export const useTools = () => {
       category: 'nav.other_tools',
       categorySlug: 'other',
       path: '/tools/other/hanzi'
+    },
+    {
+      id: 47, // 确保 ID 不重复
+      nameKey: 'snippets.title',
+      descKey: 'snippets.desc',
+      icon: '✂️', // 或者 🎨
+      color: 'bg-indigo-50 text-indigo-600',
+      category: 'nav.dev_tools', // 或者新建一个 css_tools 分类
+      categorySlug: 'dev',
+      path: '/tools/dev/css-snippets'
     }
   ]
 

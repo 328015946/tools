@@ -731,5 +731,63 @@
     "speed": "Speed",
     "download": "Download Image",
     "loading": "Loading font..."
+  },
+  "snippets": {
+    "title": "CSS Snippets Library",
+    "desc": "A collection of useful CSS generators for layout, text, and UI.",
+    "items": {
+      "triangle": {
+        "title": "CSS Triangle",
+        "desc": "Generate triangle using borders"
+      },
+      "circle": {
+        "title": "Perfect Circle",
+        "desc": "Circle or capsule shape"
+      },
+      "flex_center": {
+        "title": "Flexbox Center",
+        "desc": "Absolute centering layout"
+      },
+      "grid_center": {
+        "title": "Grid Center",
+        "desc": "Shortest centering syntax"
+      },
+      "aspect_ratio": {
+        "title": "Aspect Ratio",
+        "desc": "Keep width/height ratio (e.g. 16:9)"
+      },
+      "text_truncate": {
+        "title": "Text Truncate",
+        "desc": "Single line ellipsis"
+      },
+      "line_clamp": {
+        "title": "Line Clamp",
+        "desc": "Multi-line truncation"
+      },
+      "gradient_text": {
+        "title": "Gradient Text",
+        "desc": "Text with gradient color"
+      },
+      "vertical_text": {
+        "title": "Vertical Text",
+        "desc": "Chinese/Vertical layout"
+      },
+      "custom_scrollbar": {
+        "title": "Custom Scrollbar",
+        "desc": "Style webkit scrollbars"
+      },
+      "glassmorphism": {
+        "title": "Glass Effect",
+        "desc": "Frosted glass visual style"
+      },
+      "img_gray": {
+        "title": "Grayscale Image",
+        "desc": "Turn images black and white"
+      },
+      "no_select": {
+        "title": "Disable Selection",
+        "desc": "Prevent text selection"
+      }
+    }
   }
 }
