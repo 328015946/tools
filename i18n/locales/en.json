@@ -789,5 +789,47 @@
         "desc": "Prevent text selection"
       }
     }
+  },
+  "svg_gen": {
+    "title": "SVG Generators",
+    "desc": "Create customizable SVG icons, background patterns, and loaders.",
+    "view_code": "View Code",
+    "copy_code": "Copy SVG"
+  },
+  "svg": {
+    "items": {
+      "menu": {
+        "title": "Hamburger Menu",
+        "desc": "Standard 3-line menu icon"
+      },
+      "close": {
+        "title": "Close Icon",
+        "desc": "Standard 'X' close button"
+      },
+      "arrow": {
+        "title": "Direction Arrow",
+        "desc": "Arrow with adjustable direction"
+      },
+      "grid": {
+        "title": "Grid Pattern",
+        "desc": "Repeatable grid background"
+      },
+      "dot": {
+        "title": "Dot Pattern",
+        "desc": "Minimalist dotted background"
+      },
+      "spinner": {
+        "title": "Loading Spinner",
+        "desc": "Native SVG rotation animation"
+      },
+      "pulse": {
+        "title": "Pulse Loader",
+        "desc": "Breathing scaling animation"
+      },
+      "wave": {
+        "title": "Bottom Wave",
+        "desc": "Decorative wave for page footers"
+      }
+    }
   }
 }

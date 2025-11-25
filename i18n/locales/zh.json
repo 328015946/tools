@@ -789,5 +789,47 @@
         "desc": "防止用户复制文本"
       }
     }
+  },
+  "svg_gen": {
+    "title": "SVG 图标/纹理生成器",
+    "desc": "在线生成可定制参数的 SVG 图标、背景纹理和加载动画。",
+    "view_code": "查看源码",
+    "copy_code": "复制 SVG"
+  },
+  "svg": {
+    "items": {
+      "menu": {
+        "title": "汉堡菜单",
+        "desc": "标准的三线菜单图标"
+      },
+      "close": {
+        "title": "关闭图标",
+        "desc": "标准的 X 关闭按钮"
+      },
+      "arrow": {
+        "title": "方向箭头",
+        "desc": "可旋转方向的箭头"
+      },
+      "grid": {
+        "title": "网格背景",
+        "desc": "可重复的网格纹理 (Background Pattern)"
+      },
+      "dot": {
+        "title": "点阵背景",
+        "desc": "极简的点阵排列纹理"
+      },
+      "spinner": {
+        "title": "加载圆环",
+        "desc": "原生 SVG 旋转动画"
+      },
+      "pulse": {
+        "title": "脉冲动画",
+        "desc": "缩放渐变的呼吸效果"
+      },
+      "wave": {
+        "title": "底部波浪",
+        "desc": "用于网页底部的装饰性波浪"
+      }
+    }
   }
 }

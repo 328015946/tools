@@ -496,6 +496,16 @@ export const useTools = () => {
       category: 'nav.dev_tools', // 或者新建一个 css_tools 分类
       categorySlug: 'dev',
       path: '/tools/dev/css-snippets'
+    },
+    {
+      id: 48,
+      nameKey: 'svg_gen.title',
+      descKey: 'svg_gen.desc',
+      icon: '✒️', // 或者 🎨
+      color: 'bg-rose-100 text-rose-600',
+      category: 'nav.image_tools',
+      categorySlug: 'image',
+      path: '/tools/image/svg-snippets'
     }
   ]
 
