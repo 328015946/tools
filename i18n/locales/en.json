@@ -829,6 +829,166 @@
       "wave": {
         "title": "Bottom Wave",
         "desc": "Decorative wave for page footers"
+      },
+      "check": {
+        "title": "Checkmark",
+        "desc": "Success state icon"
+      },
+      "search": {
+        "title": "Search Icon",
+        "desc": "Magnifying glass for search bars"
+      },
+      "dots": {
+        "title": "Bouncing Dots",
+        "desc": "Three dots loading animation"
+      },
+      "bars": {
+        "title": "Audio Bars",
+        "desc": "Rhythmic bars loader"
+      },
+      "skeleton": {
+        "title": "Skeleton Loader",
+        "desc": "Shimmer effect for placeholders"
+      },
+      "stripes": {
+        "title": "Diagonal Stripes",
+        "desc": "Warning or texture background"
+      },
+      "checker": {
+        "title": "Checkerboard",
+        "desc": "Transparent background representation"
+      },
+      "blob": {
+        "title": "Organic Blob",
+        "desc": "Trendy fluid shape decoration"
+      },
+      "curve": {
+        "title": "Header Curve",
+        "desc": "Curved divider for sections"
+      },
+      "ribbon": {
+        "title": "Corner Ribbon",
+        "desc": "Label for card corners"
+      },
+      "home": {
+        "title": "Home",
+        "desc": "Standard house navigation icon"
+      },
+      "user": {
+        "title": "User Profile",
+        "desc": "Avatar placeholder or profile"
+      },
+      "settings": {
+        "title": "Settings",
+        "desc": "Gear icon for configurations"
+      },
+      "trash": {
+        "title": "Trash/Delete",
+        "desc": "Bin icon for removing items"
+      },
+      "edit": {
+        "title": "Edit/Pen",
+        "desc": "Pencil icon for modification"
+      },
+      "download": {
+        "title": "Download",
+        "desc": "Arrow down with base line"
+      },
+      "share": {
+        "title": "Share",
+        "desc": "Standard node sharing icon"
+      },
+      "mail": {
+        "title": "Mail/Envelope",
+        "desc": "Contact or newsletter icon"
+      },
+      "link": {
+        "title": "Link/Chain",
+        "desc": "Hyperlink connection icon"
+      },
+      "eye": {
+        "title": "Eye/Visible",
+        "desc": "Show password or view details"
+      },
+      "ring": {
+        "title": "Notch Ring",
+        "desc": "Classic spinning notch loader"
+      },
+      "sync": {
+        "title": "Sync/Refresh",
+        "desc": "Rotating dual arrows"
+      },
+      "typing": {
+        "title": "Typing",
+        "desc": "Three jumping dots for chat"
+      },
+      "wifi": {
+        "title": "Wifi Signal",
+        "desc": "Spreading signal waves"
+      },
+      "upload": {
+        "title": "Cloud Upload",
+        "desc": "Arrow moving up in cloud"
+      },
+      "square": {
+        "title": "Spin Square",
+        "desc": "Rotating geometric square"
+      },
+      "gear": {
+        "title": "Processing",
+        "desc": "Spinning gear/cog settings"
+      },
+      "heart": {
+        "title": "Heartbeat",
+        "desc": "Pulsing heart animation"
+      },
+      "hourglass": {
+        "title": "Hourglass",
+        "desc": "Rotating wait timer"
+      },
+      "infinity": {
+        "title": "Infinity",
+        "desc": "Flowing infinite loop"
+      },
+      "slant": {
+        "title": "Slant Divider",
+        "desc": "Modern diagonal section break"
+      },
+      "zigzag": {
+        "title": "Zigzag Edge",
+        "desc": "For coupons or playful borders"
+      },
+      "clouds": {
+        "title": "Cloud/Wave",
+        "desc": "Soft cloudy bottom divider"
+      },
+      "bubble": {
+        "title": "Speech Bubble",
+        "desc": "Tooltip or comment container"
+      },
+      "squiggle": {
+        "title": "Squiggle",
+        "desc": "Hand-drawn text highlight"
+      },
+      "badge": {
+        "title": "Star Badge",
+        "desc": "For sales, awards or new items"
+      },
+      "concentric": {
+        "title": "Concentric",
+        "desc": "Target-like circle background"
+      },
+      "dotsgrid": {
+        "title": "Dot Grid",
+        "desc": "Common tech/SaaS background"
+      },
+      "hex": {
+        "title": "Hexagon",
+        "desc": "Tech-style geometric shape"
+      },
+      "blurblob": {
+        "title": "Blur Orb",
+        "desc": "Soft gradient light effect"
       }
     }
   }
