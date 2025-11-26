@@ -991,5 +991,17 @@
         "desc": "Soft gradient light effect"
       }
     }
+  },
+  "css_filter": {
+    "title": "CSS Filter Generator",
+    "desc": "Visually adjust CSS filter properties (e.g., blur, saturation, brightness) and quickly generate the corresponding code."
+  },
+  "tool": {
+    "controls": "Filter Controls",
+    "reset": "Reset",
+    "upload_img": "Upload Image",
+    "live_preview": "Live Preview",
+    "generated_code": "Generated CSS",
+    "copy": "Copy"
   }
 }

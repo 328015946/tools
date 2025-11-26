@@ -844,7 +844,7 @@ export const useSvgSnippets = () => {
     },
 
     // 4. 气泡对话框 (Speech Bubble) - 用于引用、评价或提示
-   // 4. 气泡对话框 (Speech Bubble) - 升级版：支持文字
+    // 4. 气泡对话框 (Speech Bubble) - 升级版：支持文字
     {
       id: 'shape-bubble',
       nameKey: 'svg.items.bubble.title',
@@ -862,20 +862,26 @@ export const useSvgSnippets = () => {
         { type: 'color', key: 'textColor', label: 'Txt Color' }
       ],
       getCode: p => {
-        const w = p.width, h = p.height;
+        const w = p.width,
+          h = p.height
         // 路径生成逻辑
-        const path = p.tail === 'bottom'
-          ? `M0 10 A10 10 0 0 1 10 0 H${w-10} A10 10 0 0 1 ${w} 10 V${h-10} A10 10 0 0 1 ${w-10} ${h} H${w/2 + 10} L${w/2} ${h+10} L${w/2 - 10} ${h} H10 A10 10 0 0 1 0 ${h-10} Z`
-          : `M10 0 H${w-10} A10 10 0 0 1 ${w} 10 V${h-10} A10 10 0 0 1 ${w-10} ${h} H10 A10 10 0 0 1 0 ${h-10} V${h/2 + 10} L-10 ${h/2} L0 ${h/2 - 10} V10 A10 10 0 0 1 10 0 Z`;
+        const path =
+          p.tail === 'bottom'
+            ? `M0 10 A10 10 0 0 1 10 0 H${w - 10} A10 10 0 0 1 ${w} 10 V${h - 10} A10 10 0 0 1 ${w - 10} ${h} H${
+                w / 2 + 10
+              } L${w / 2} ${h + 10} L${w / 2 - 10} ${h} H10 A10 10 0 0 1 0 ${h - 10} Z`
+            : `M10 0 H${w - 10} A10 10 0 0 1 ${w} 10 V${h - 10} A10 10 0 0 1 ${w - 10} ${h} H10 A10 10 0 0 1 0 ${
+                h - 10
+              } V${h / 2 + 10} L-10 ${h / 2} L0 ${h / 2 - 10} V10 A10 10 0 0 1 10 0 Z`
 
         // viewBox 逻辑
-        const vb = p.tail === 'bottom' ? `-5 -5 ${w+10} ${h+20}` : `-15 -5 ${w+20} ${h+10}`;
+        const vb = p.tail === 'bottom' ? `-5 -5 ${w + 10} ${h + 20}` : `-15 -5 ${w + 20} ${h + 10}`
 
         // 文字坐标计算
         // 如果尾巴在下面，文字中心就是 w/2, h/2
         // 如果尾巴在左边，文字中心也是 w/2, h/2 (因为 path 也是基于 0,0 开始画主体的)
-        const cx = w / 2;
-        const cy = h / 2;
+        const cx = w / 2
+        const cy = h / 2
 
         return `<svg width="${w}" height="${h}" viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">
   <path d="${path}" fill="${p.color}" />

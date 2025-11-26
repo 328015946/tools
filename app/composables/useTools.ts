@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-21 15:47:06
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-22 16:22:29
+ * @LastEditTime: 2025-11-26 13:56:21
  * @FilePath: \xiao-nuxt4\app\composables\useTools.ts
  * @Description: 注释
  */
@@ -506,6 +506,16 @@ export const useTools = () => {
       category: 'nav.image_tools',
       categorySlug: 'image',
       path: '/tools/image/svg-snippets'
+    },
+    {
+      id: 49,
+      nameKey: 'css_filter.title',
+      descKey: 'css_filter.desc',
+      icon: '🪄', // 魔法棒，代表效果/特效
+      color: 'bg-pink-100 text-pink-600',
+      category: 'nav.image_tools',
+      categorySlug: 'image',
+      path: '/tools/image/css-filter'
     }
   ]
 
