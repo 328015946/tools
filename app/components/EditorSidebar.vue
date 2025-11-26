@@ -34,7 +34,19 @@
       isDrawing.value = false
     }
   })
+  // [新增] 开始拖拽处理函数
+  const handleDragStart = (e: DragEvent, item: any) => {
+    console.log('拖动素材：', item)
+    if (e.dataTransfer) {
+      console.log('拖动素材：', item)
+      // 告诉浏览器这是一次“复制”操作
+      e.dataTransfer.effectAllowed = 'copy'
+      // 将要添加的元素数据序列化存入
+      e.dataTransfer.setData('design-item', JSON.stringify(item))
 
+      // 可以在这里设置拖拽时的幻影图片（可选，默认是元素截图）
+    }
+  }
   const handleUpload = (e: Event) => {
     const input = e.target as HTMLInputElement
     if (input.files?.[0]) {
@@ -193,6 +205,8 @@
           <div
             v-for="(item, idx) in assets.elements"
             :key="idx"
+            draggable="true"
+            @dragstart="e => handleDragStart(e, item)"
             @click="emit('add-element', item)"
             class="aspect-square bg-gray-50 hover:bg-gray-100 rounded-lg flex items-center justify-center cursor-pointer border border-transparent hover:border-indigo-200 transition group">
             <!-- 恢复了形状判断逻辑 -->
@@ -212,6 +226,8 @@
           <div
             v-for="(item, idx) in assets.text"
             :key="idx"
+            draggable="true"
+            @dragstart="e => handleDragStart(e, item)"
             @click="emit('add-element', item)"
             class="bg-gray-50 hover:bg-indigo-50 border hover:border-indigo-200 rounded p-4 cursor-pointer transition text-center">
             <span :style="{ fontSize: item.fontSize > 30 ? '24px' : '16px', fontWeight: item.fontWeight }">{{

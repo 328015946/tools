@@ -471,17 +471,83 @@
     isHistoryProcessing = false
     saveHistory() // 保存模版加载后的状态
   }
-
-  // --- 添加新元素 (侧边栏点击) ---
-  const addElement = (item: any) => {
+  // [新增] 处理拖拽放置
+  const handleDropElement = ({ item, x, y }: { item: any; x: number; y: number }) => {
     if (!canvas.value) return
-    const center = canvas.value.getCenter()
-    // 新添加的元素，强制居中
-    const defaultPos = { left: center.left, top: center.top, originX: 'center', originY: 'center' }
 
+    // 1. 获取画布在屏幕上的位置
+    // workspace 传来的 x,y 是相对于滚动容器的，我们需要转换成 Canvas 内部坐标
+    // 最简单的方法是利用 Fabric 的 getPointer 或者 vptCoords
+
+    // 由于我们是在父容器 drop 的，坐标转换稍微有点复杂。
+    // 为了简化，我们直接利用 Fabric 的机制：
+    // 这里的 x, y 是相对于那个 flex-center 容器的
+    // 我们需要减去 Canvas DOM 元素本身的偏移量
+
+    // 获取 Canvas 元素的实际 DOM 位置
+    const canvasEl = canvas.value.upperCanvasEl
+    const rect = canvasEl.getBoundingClientRect()
+
+    // 计算鼠标相对于 Canvas 左上角的真实像素位置
+    // e.clientX (全局) - rect.left (Canvas左边)
+    // 但这里我们只拿到了 workspace 传来的相对坐标，这种传参方式不够精确。
+
+    // --- 更好的做法：重新计算 ---
+    // 我们其实不需要 workspace 传 x/y，我们只需要 item，
+    // 因为 drop 事件发生时，我们无法在父组件拿到 event 对象。
+
+    // 修正方案：
+    // 我们直接在 addElement 函数里增加 x, y 参数
+    addElement(item, x, y)
+  }
+  // --- 添加新元素 (侧边栏点击) ---
+  // --- DesignEditor.vue ---
+
+  // [修改] addElement 函数，支持传入坐标 (dropX, dropY 为屏幕绝对坐标 e.clientX/Y)
+  const addElement = (item: any, dropX?: number, dropY?: number) => {
+    if (!canvas.value) return
+
+    let left, top
+
+    // 判断是“拖拽放下”还是“点击添加”
+    if (dropX !== undefined && dropY !== undefined) {
+      // 1. 获取 Canvas 元素在网页上的位置
+      const canvasRect = canvas.value.upperCanvasEl.getBoundingClientRect()
+
+      // 2. 计算鼠标相对于 Canvas 左上角的偏移 (像素)
+      const mouseX = dropX - canvasRect.left
+      const mouseY = dropY - canvasRect.top
+
+      // 3. 处理 Canvas 的缩放和平移 (Viewport Transform)
+      // 这是为了确保即使画布缩放了，拖进去的位置也是准的
+      const vpt = canvas.value.viewportTransform
+      if (vpt) {
+        // 反转矩阵，将屏幕像素坐标转换回 Canvas 逻辑坐标
+        const invertedVpt = fabric.value.util.invertTransform(vpt)
+        const point = fabric.value.util.transformPoint({ x: mouseX, y: mouseY }, invertedVpt)
+        left = point.x
+        top = point.y
+      } else {
+        left = mouseX
+        top = mouseY
+      }
+    } else {
+      // 默认点击添加：放在画布视口中心
+      const center = canvas.value.getCenter()
+      // getCenter 返回的是逻辑坐标，直接用即可
+      // 但为了让用户看到新元素，最好根据当前的 viewport 调整一下（可选，这里先用简单居中）
+      // fabric v6: canvas.getVpCenter() 可能更准
+      const vpCenter = canvas.value.getVpCenter()
+      left = vpCenter.x
+      top = vpCenter.y
+    }
+
+    const commonProps = { left, top, originX: 'center', originY: 'center' }
+
+    // --- 根据类型创建对象 ---
     if (item.type === 'text') {
       const text = new fabric.value.IText(item.content, {
-        ...defaultPos,
+        ...commonProps,
         fontSize: item.fontSize,
         fontWeight: item.fontWeight,
         fontFamily: 'Arial',
@@ -491,7 +557,7 @@
       canvas.value.setActiveObject(text)
     } else if (item.type === 'shape') {
       let shape
-      const opts = { ...defaultPos, fill: item.color, width: 100, height: 100 }
+      const opts = { ...commonProps, fill: item.color, width: 100, height: 100 }
 
       if (item.shape === 'rect') shape = new fabric.value.Rect(opts)
       if (item.shape === 'circle') shape = new fabric.value.Circle({ ...opts, radius: 50 })
@@ -502,20 +568,23 @@
         canvas.value.setActiveObject(shape)
       }
     } else if (item.type === 'image') {
+      // 图片加载是异步的
       fabric.value.FabricImage.fromURL(item.url, { crossOrigin: 'anonymous' })
         .then((img: any) => {
           if (!img) return
-          img.set({
-            ...defaultPos,
-            left: center.left,
-            top: center.top
-          })
-          if (img.width > 300) img.scaleToWidth(300)
+
+          img.set({ ...commonProps })
+
+          // 限制图片大小，避免过大占满屏幕
+          if (img.width > 300) {
+            img.scaleToWidth(300)
+          }
+
           canvas.value.add(img)
           canvas.value.setActiveObject(img)
-          saveHistory()
+          saveHistory() // 图片加载完需要手动存一次历史
         })
-        .catch((err: any) => console.error(err))
+        .catch((err: any) => console.error('图片加载失败', err))
     }
   }
 
@@ -674,7 +743,11 @@
         @set-brush-color="setBrushColor"
         @set-brush-width="setBrushWidth" />
 
-      <EditorWorkspace :zoom-level="zoomLevel" @canvas-ready="initCanvas" @update-zoom="handleZoom" />
+      <EditorWorkspace
+        :zoom-level="zoomLevel"
+        @canvas-ready="initCanvas"
+        @update-zoom="handleZoom"
+        @drop-element="handleDropElement" />
 
       <EditorSettings
         :active-object="activeObject"

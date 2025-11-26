@@ -13,9 +13,21 @@
     zoomLevel: number
   }>()
 
-  const emit = defineEmits(['canvas-ready', 'update-zoom'])
+  // [新增] 接收 drop 事件
+  const emit = defineEmits(['canvas-ready', 'update-zoom', 'drop-element']) // 增加 drop-element
   const canvasEl = ref<HTMLCanvasElement | null>(null)
-
+  const handleDrop = (e: DragEvent) => {
+    e.preventDefault()
+    const itemString = e.dataTransfer?.getData('design-item')
+    if (itemString) {
+      // 直接传递原始的屏幕坐标
+      emit('drop-element', {
+        item: JSON.parse(itemString),
+        x: e.clientX,
+        y: e.clientY
+      })
+    }
+  }
   onMounted(() => {
     if (canvasEl.value) {
       // 告诉父组件：Canvas 元素准备好了，你可以初始化了
@@ -27,7 +39,10 @@
 <template>
   <main class="flex-1 bg-gray-100 flex flex-col relative overflow-hidden">
     <!-- 画布容器 -->
-    <div class="flex-1 overflow-auto flex items-center justify-center p-8 custom-scrollbar">
+    <div
+      class="flex-1 overflow-auto flex items-center justify-center p-8 custom-scrollbar"
+      @drop="handleDrop"
+      @dragover.prevent>
       <div class="shadow-xl bg-white relative">
         <canvas ref="canvasEl"></canvas>
       </div>
