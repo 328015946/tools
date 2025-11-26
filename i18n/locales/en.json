@@ -1,4 +1,5 @@
 {
+  "settings": "Settings",
   "global": {
     "copy_success": "Copied to clipboard!",
     "copy_fail": "Failed to copy",
@@ -1003,5 +1004,55 @@
     "live_preview": "Live Preview",
     "generated_code": "Generated CSS",
     "copy": "Copy"
+  },
+  "calc": {
+    "bmi_title": "BMI Health Calculator",
+    "bmi_desc": "Calculate Body Mass Index (BMI) based on height and weight and assess health risks.",
+    "height": "Height (cm)",
+    "weight": "Weight (kg)",
+    "result": "Calculation Result",
+    "bmi_val": "Your BMI Value",
+    "status": "Health Status",
+    "underweight": "Underweight (Below 18.5)",
+    "normal": "Normal Weight (18.5 - 24.9)",
+    "overweight": "Overweight (25.0 - 29.9)",
+    "obese_1": "Obesity Class I (30.0 - 34.9)",
+    "obese_2": "Obesity Class II (35.0 - 39.9)",
+    "obese_3": "Obesity Class III (Above 40.0)",
+    "unit_system": "Measurement System",
+    "metric": "Metric (cm/kg)",
+    "imperial": "Imperial (in/lb)",
+    "reset_success": "Input values have been reset.",
+    "health_tip": "Please consult a health professional for personalized advice.",
+    "enter_valid_data": "Please enter valid height and weight data.",
+    "input": "Input Parameters"
+  },
+  "speech": {
+    "title": "Text-to-Speech (TTS)",
+    "desc": "Utilize the browser's native speech synthesis API to read text aloud.",
+    "input_text": "Text to be spoken",
+    "voice_select": "Select Voice",
+    "rate": "Rate (Speed)",
+    "pitch": "Pitch (Tone)",
+    "speak": "Speak",
+    "stop": "Stop",
+    "browser_unsupport": "Sorry, your browser does not support the Web Speech API.",
+    "no_voices_available": "Voices are not loaded yet, please try again shortly.",
+    "start_speaking": "Starting playback...",
+    "end_speaking": "Playback finished.",
+    "error_message": "TTS Error: {error}. Please try changing the voice or checking the text.",
+    "error_generic": "Failed to call playback API. Please check browser settings or voice selection."
+  },
+  "typing_master": {
+    "title": "Typing Master",
+    "desc": "Online typing speed and accuracy test to improve your input efficiency.",
+    "start": "Start Test",
+    "restart": "Restart",
+    "wpm": "WPM (Words Per Minute)",
+    "accuracy": "Accuracy",
+    "errors": "Errors",
+    "time_left": "Time Left",
+    "input_placeholder": "Start typing here...",
+    "finish_message": "Test finished! Your WPM: {wpm}, Accuracy: {accuracy}%"
   }
 }

@@ -1,4 +1,5 @@
 {
+  "settings": "设置",
   "global": {
     "copy_success": "复制成功！",
     "copy_fail": "复制失败，请重试",
@@ -1003,5 +1004,55 @@
     "live_preview": "实时预览",
     "generated_code": "生成的 CSS",
     "copy": "复制"
+  },
+  "calc": {
+    "bmi_title": "BMI 健康指数计算器",
+    "bmi_desc": "根据身高和体重计算身体质量指数 (BMI) 并评估健康风险。",
+    "height": "身高 (cm)",
+    "weight": "体重 (kg)",
+    "result": "计算结果",
+    "bmi_val": "您的 BMI 值",
+    "status": "健康状态",
+    "underweight": "体重过轻 (低于 18.5)",
+    "normal": "健康体重 (18.5 - 24.9)",
+    "overweight": "超重 (25.0 - 29.9)",
+    "obese_1": "肥胖 I 级 (30.0 - 34.9)",
+    "obese_2": "肥胖 II 级 (35.0 - 39.9)",
+    "obese_3": "肥胖 III 级 (高于 40.0)",
+    "unit_system": "计量单位",
+    "metric": "公制 (cm/kg)",
+    "imperial": "英制 (in/lb)",
+    "reset_success": "已重置输入值。",
+    "health_tip": "请咨询专业医疗人士以获得个性化建议。",
+    "enter_valid_data": "请输入有效的身高和体重。",
+    "input": "输入参数"
+  },
+  "speech": {
+    "title": "文本转语音 (TTS)",
+    "desc": "使用浏览器内置的合成语音 API，将文本朗读出来。",
+    "input_text": "要朗读的文本",
+    "voice_select": "选择声音",
+    "rate": "语速",
+    "pitch": "音高",
+    "speak": "朗读",
+    "stop": "停止",
+    "browser_unsupport": "抱歉，您的浏览器不支持语音合成 API。",
+    "no_voices_available": "声音未加载完成，请稍候再试。",
+    "start_speaking": "开始朗读...",
+    "end_speaking": "朗读结束。",
+    "error_message": "TTS 发生错误: {error}。请尝试更换声音或检查文本。",
+    "error_generic": "朗读调用失败，请检查浏览器设置或声音选择。"
+  },
+  "typing_master": {
+    "title": "打字练习大师",
+    "desc": "在线打字速度和准确率测试，提高您的输入效率。",
+    "start": "开始练习",
+    "restart": "重新开始",
+    "wpm": "WPM (每分钟字数)",
+    "accuracy": "准确率",
+    "errors": "错误数",
+    "time_left": "剩余时间",
+    "input_placeholder": "从这里开始输入...",
+    "finish_message": "练习结束！您的 WPM: {wpm}, 准确率: {accuracy}%"
   }
 }

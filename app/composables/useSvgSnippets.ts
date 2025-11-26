@@ -1,7 +1,7 @@
 // composables/useSvgSnippets.ts
 import { reactive } from 'vue'
 
-export interface SnippetControl {
+export interface SvgSnippetControl {
   type: 'select' | 'color' | 'number' | 'range' | 'boolean'
   key: string
   label: string
@@ -17,7 +17,7 @@ export interface SvgSnippet {
   descKey: string
   category: 'Icon' | 'Pattern' | 'Loader' | 'Shape'
   params: Record<string, any>
-  controls: SnippetControl[]
+  controls: SvgSnippetControl[]
   // 返回 SVG 字符串
   getCode: (params: any) => string
 }

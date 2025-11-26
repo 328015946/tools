@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-21 15:47:06
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-26 13:56:21
+ * @LastEditTime: 2025-11-26 14:57:22
  * @FilePath: \xiao-nuxt4\app\composables\useTools.ts
  * @Description: 注释
  */
@@ -516,6 +516,38 @@ export const useTools = () => {
       category: 'nav.image_tools',
       categorySlug: 'image',
       path: '/tools/image/css-filter'
+    },
+    // BMI 健康指数计算器
+    {
+      id: 50,
+      nameKey: 'calc.bmi_title',
+      descKey: 'calc.bmi_desc',
+      icon: '🏋️',
+      color: 'bg-green-50 text-green-700',
+      category: 'nav.other_tools',
+      categorySlug: 'other',
+      path: '/tools/other/bmi-calc'
+    },
+    // 文本转语音 (TTS)
+    {
+      id: 51,
+      nameKey: 'speech.title',
+      descKey: 'speech.desc',
+      icon: '🗣️',
+      color: 'bg-cyan-50 text-cyan-700',
+      category: 'nav.other_tools',
+      categorySlug: 'other',
+      path: '/tools/other/text-to-speech'
+    },
+    {
+      id: 52,
+      nameKey: 'typing_master.title',
+      descKey: 'typing_master.desc',
+      icon: '⌨️',
+      color: 'bg-cyan-100 text-cyan-700',
+      category: 'nav.other_tools',
+      categorySlug: 'other',
+      path: '/tools/other/typing-master'
     }
   ]
 
