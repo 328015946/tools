@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-21 15:47:06
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-26 14:57:22
+ * @LastEditTime: 2025-11-26 16:11:54
  * @FilePath: \xiao-nuxt4\app\composables\useTools.ts
  * @Description: 注释
  */
@@ -548,6 +548,16 @@ export const useTools = () => {
       category: 'nav.other_tools',
       categorySlug: 'other',
       path: '/tools/other/typing-master'
+    },
+    {
+      id: 53,
+      nameKey: 'poster_design.title', // 对应 locale json 里的 key
+      descKey: 'poster_design.desc',
+      icon: '🎨',
+      color: 'bg-purple-100 text-purple-600', // 紫色系适合设计类
+      category: 'nav.image_tools', // 归类到图片工具
+      categorySlug: 'image',
+      path: '/tools/image/poster' // ⚠️ 注意：文件路径需要匹配
     }
   ]
 

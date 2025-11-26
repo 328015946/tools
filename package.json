@@ -26,6 +26,7 @@
     "dayjs": "^1.11.19",
     "diff": "^8.0.2",
     "dompurify": "^3.3.0",
+    "fabric": "^6.9.0",
     "fast-xml-parser": "^5.3.2",
     "hanzi-writer": "^3.7.3",
     "highlight.js": "^11.11.1",

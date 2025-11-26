@@ -1054,5 +1054,9 @@
     "time_left": "Time Left",
     "input_placeholder": "Start typing here...",
     "finish_message": "Test finished! Your WPM: {wpm}, Accuracy: {accuracy}%"
+  },
+  "poster_design": {
+    "title": "Poster Designer",
+    "desc": "Online poster design tool. Supports custom backgrounds, drag-and-drop elements, text editing, and HD export."
   }
 }

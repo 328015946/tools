@@ -1054,5 +1054,9 @@
     "time_left": "剩余时间",
     "input_placeholder": "从这里开始输入...",
     "finish_message": "练习结束！您的 WPM: {wpm}, 准确率: {accuracy}%"
+  },
+  "poster_design": {
+    "title": "海报设计大师",
+    "desc": "在线海报设计工具，支持自定义背景、拖拽素材、文字编辑与高清导出。"
   }
 }
