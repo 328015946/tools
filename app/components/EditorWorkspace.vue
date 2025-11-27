@@ -2,48 +2,101 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-26 16:47:10
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-27 12:05:18
+ * @LastEditTime: 2025-11-27 14:36:57
  * @FilePath: \xiao-nuxt4\app\components\EditorWorkspace.vue
  * @Description: 注释
 -->
 <script setup lang="ts">
-  import { onMounted, ref } from 'vue'
+  import { onMounted, onUnmounted, ref } from 'vue'
 
   defineProps<{
     zoomLevel: number
-    showGrid?: boolean // 新增
+    showGrid?: boolean
   }>()
 
-  // [新增] 接收 drop 事件
-  const emit = defineEmits(['canvas-ready', 'update-zoom', 'drop-element']) // 增加 drop-element
+  const emit = defineEmits(['canvas-ready', 'update-zoom', 'drop-element', 'workspace-resize'])
+
   const canvasEl = ref<HTMLCanvasElement | null>(null)
   const workspaceEl = ref<HTMLDivElement | null>(null)
-  // --- [新增] 平移相关的状态 ---
+
   const translateX = ref(0)
   const translateY = ref(0)
-  const isPanning = ref(false) // 是否按下空格
-  const isDragging = ref(false) // 是否正在拖拽
-  // 1. 新增记录上一次鼠标位置的变量
+  const isPanning = ref(false)
+  const isDragging = ref(false)
+
   let lastX = 0
   let lastY = 0
-  // [新增] 监听容器大小变化 (使用 ResizeObserver)
   let resizeObserver: ResizeObserver | null = null
 
+  // ... handleDrop 保持不变 ...
   const handleDrop = (e: DragEvent) => {
     e.preventDefault()
     const json = e.dataTransfer?.getData('design-item')
     if (json && workspaceEl.value) {
       const item = JSON.parse(json)
-      // 注意：这里可能需要根据缩放比例修正坐标，但 Fabric 通常能处理
       emit('drop-element', { item, x: e.clientX, y: e.clientY })
     }
   }
-  onMounted(() => {
-    if (canvasEl.value) {
-      emit('canvas-ready', canvasEl.value)
-    }
 
-    // 监听 workspace 容器大小，用于自动计算缩放
+  // --- 键盘处理 (增强健壮性) ---
+  const handleKeydown = (e: KeyboardEvent) => {
+    // 1. 如果正在输入文字，忽略
+    const activeEl = document.activeElement?.tagName
+    if (activeEl === 'INPUT' || activeEl === 'TEXTAREA' || (activeEl as any)?.isContentEditable) return
+
+    // 2. 兼容性检查: e.code === 'Space' 或者 e.key === ' '
+    if (e.code === 'Space' || e.key === ' ') {
+      e.preventDefault() // 防止网页滚动
+
+      // 3. 防止长按重复触发
+      if (!e.repeat) {
+        isPanning.value = true
+      }
+    }
+  }
+
+  const handleKeyup = (e: KeyboardEvent) => {
+    // 松开空格键
+    if (e.code === 'Space' || e.key === ' ') {
+      isPanning.value = false
+      isDragging.value = false
+    }
+  }
+
+  // --- 鼠标处理 (逻辑不变，但现在绑定在遮罩层上) ---
+  const handleMouseDown = (e: MouseEvent) => {
+    // 因为有遮罩层存在，肯定是 isPanning=true，直接开始拖拽
+    isDragging.value = true
+    lastX = e.clientX
+    lastY = e.clientY
+    // 阻止冒泡，不让 Fabric 收到事件
+    e.stopPropagation()
+    e.preventDefault()
+  }
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (isDragging.value) {
+      const deltaX = e.clientX - lastX
+      const deltaY = e.clientY - lastY
+      translateX.value += deltaX
+      translateY.value += deltaY
+      lastX = e.clientX
+      lastY = e.clientY
+    }
+  }
+
+  const handleMouseUp = () => {
+    isDragging.value = false
+  }
+
+  // 全局重置 (防止 Alt+Tab 切出去后状态卡死)
+  const resetInteractionState = () => {
+    isPanning.value = false
+    isDragging.value = false
+  }
+
+  onMounted(() => {
+    if (canvasEl.value) emit('canvas-ready', canvasEl.value)
     if (workspaceEl.value) {
       resizeObserver = new ResizeObserver(entries => {
         for (const entry of entries) {
@@ -53,87 +106,46 @@
       })
       resizeObserver.observe(workspaceEl.value)
     }
-    // [新增] 全局键盘监听 (空格键)
+
+    // 监听键盘
     window.addEventListener('keydown', handleKeydown)
     window.addEventListener('keyup', handleKeyup)
+
+    // 安全性监听：鼠标移出窗口或失焦时重置
+    window.addEventListener('mouseup', handleMouseUp) // 保持全局mouseup以防拖出div
+    window.addEventListener('blur', resetInteractionState)
   })
-  // --- [新增] 键盘处理 ---
-  const handleKeydown = (e: KeyboardEvent) => {
-    // 只有没在输入框里打字时，按空格才算平移
-    const activeEl = document.activeElement?.tagName
-    if (e.code === 'Space' && activeEl !== 'INPUT' && activeEl !== 'TEXTAREA') {
-      e.preventDefault() // 防止页面向下滚动
-      isPanning.value = true
-    }
-  }
 
-  const handleKeyup = (e: KeyboardEvent) => {
-    if (e.code === 'Space') {
-      isPanning.value = false
-      isDragging.value = false // 松开空格强制结束拖拽
-    }
-  }
-
-  // 2. 修改 handleMouseDown
-  const handleMouseDown = (e: MouseEvent) => {
-    // 只有按住空格键，或者按下了鼠标中键(滚轮键)，才允许拖拽
-    if (isPanning.value || e.button === 1) {
-      isDragging.value = true
-      // 记录初始点击位置
-      lastX = e.clientX
-      lastY = e.clientY
-      e.preventDefault()
-    }
-  }
-
-  // 3. 修改 handleMouseMove
-  const handleMouseMove = (e: MouseEvent) => {
-    if (isDragging.value) {
-      // 计算差值
-      const deltaX = e.clientX - lastX
-      const deltaY = e.clientY - lastY
-
-      // 更新偏移量
-      translateX.value += deltaX
-      translateY.value += deltaY
-
-      // 更新上一次的位置，为下一帧做准备
-      lastX = e.clientX
-      lastY = e.clientY
-    }
-  }
-
-  const handleMouseUp = () => {
-    isDragging.value = false
-  }
-  // [新增] 复位视图方法
-  const resetView = () => {
-    translateX.value = 0
-    translateY.value = 0
-  }
   onUnmounted(() => {
     resizeObserver?.disconnect()
     window.removeEventListener('keydown', handleKeydown)
     window.removeEventListener('keyup', handleKeyup)
+    window.removeEventListener('mouseup', handleMouseUp)
+    window.removeEventListener('blur', resetInteractionState)
   })
+
+  // ... panToCenter, resetView, defineExpose 保持不变 ...
+  const panToCenter = (targetX: number, targetY: number, canvasWidth: number, canvasHeight: number) => {
+    translateX.value = canvasWidth / 2 - targetX
+    translateY.value = canvasHeight / 2 - targetY
+  }
+  const resetView = () => {
+    translateX.value = 0
+    translateY.value = 0
+  }
+  defineExpose({ panToCenter })
 </script>
 
 <template>
   <div
     class="bg-gray-100 flex-1 relative overflow-hidden flex items-center justify-center p-10 select-none"
     ref="workspaceEl"
-    :class="isDragging ? 'cursor-grabbing' : isPanning ? 'cursor-grab' : 'cursor-default'"
-    @mousedown="handleMouseDown"
-    @mousemove="handleMouseMove"
-    @mouseup="handleMouseUp"
-    @mouseleave="handleMouseUp"
     @dragover.prevent
     @drop="handleDrop"
     @wheel.ctrl.prevent="$emit('update-zoom', $event.deltaY > 0 ? -5 : 5)">
     <!--
-      [修改] 增加 transform 样式
-      transform-origin: center center 让它永远居中缩放
-      transition: 让缩放有丝滑的动画
+      内容包裹层
+      注意：这里移除了原本挂在最外层的 mousedown/mousemove，移到了遮罩层上
     -->
     <div
       class="relative shadow-lg bg-white transition-transform ease-out will-change-transform"
@@ -143,21 +155,36 @@
         transformOrigin: 'center center'
       }">
       <canvas ref="canvasEl"></canvas>
-
       <div v-if="showGrid" class="absolute inset-0 pointer-events-none z-10 grid-pattern"></div>
-      <!-- [可选] 添加一个复位按钮，防止拖没了找不回来 -->
-      <div v-if="translateX !== 0 || translateY !== 0" class="absolute bottom-4 right-4 z-20">
-        <button
-          @click="resetView"
-          class="bg-gray-800 text-white text-xs px-3 py-1.5 rounded-full shadow-lg opacity-80 hover:opacity-100 transition">
-          复位视图
-        </button>
-      </div>
+
+      <!--
+         🟢 [核心修复] 平移遮罩层 (Interaction Overlay)
+         1. v-show="isPanning": 只有按住空格时才出现
+         2. z-index: 50: 保证盖在 Fabric 画布(z-index通常是0-1)上面
+         3. cursor: grab: 强制显示抓手，Fabric 无法覆盖
+         4. 事件: 专门接管平移拖拽
+      -->
+      <div
+        v-show="isPanning"
+        class="absolute inset-0 z-50"
+        :class="isDragging ? 'cursor-grabbing' : 'cursor-grab'"
+        @mousedown.stop="handleMouseDown"
+        @mousemove="handleMouseMove"
+        @mouseup="handleMouseUp"
+        @mouseleave="handleMouseUp"></div>
+    </div>
+
+    <!-- 复位按钮 -->
+    <div v-if="translateX !== 0 || translateY !== 0" class="absolute bottom-4 right-4 z-20">
+      <button
+        @click="resetView"
+        class="bg-gray-800 text-white text-xs px-3 py-1.5 rounded-full shadow-lg opacity-80 hover:opacity-100 transition">
+        复位视图
+      </button>
     </div>
   </div>
 </template>
 
-<!-- 样式保持不变 -->
 <style scoped>
   .grid-pattern {
     background-size: 20px 20px;

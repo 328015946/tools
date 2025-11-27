@@ -75,7 +75,15 @@
         :class="activeTab === tab ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'">
         <span class="text-xl capitalize">
           {{
-            tab === 'templates' ? '🎨' : tab === 'elements' ? '🧩' : tab === 'text' ? 'T' : tab === 'draw' ? '🖊️' : '☁️'
+            tab === 'templates'
+              ? '🎨 '
+              : tab === 'elements'
+              ? '🧩'
+              : tab === 'text'
+              ? 'T'
+              : tab === 'draw'
+              ? '🖊️'
+              : '☁️'
           }}
         </span>
         <span class="text-[10px]">{{
@@ -112,7 +120,9 @@
               ? '添加文字'
               : activeTab === 'draw'
               ? '自由绘制'
-              : '本地上传'
+              : activeTab === 'upload'
+              ? '本地上传'
+              : '图层管理'
           }}
         </h2>
       </div>
@@ -229,7 +239,13 @@
               :style="{ backgroundColor: item.color }"
               class="w-10 h-10 shadow-sm transition-transform group-hover:scale-110"
               :class="
-                item.shape === 'circle' ? 'rounded-full' : item.shape === 'triangle' ? 'clip-triangle' : 'rounded-sm'
+                item.shape === 'circle'
+                  ? 'rounded-full'
+                  : item.shape === 'triangle'
+                  ? 'clip-triangle'
+                  : item.shape === 'star'
+                  ? 'clip-star'
+                  : 'rounded-sm'
               "></div>
             <img v-else :src="item.url" class="w-12 h-12 object-contain transition-transform group-hover:scale-110" />
           </div>
@@ -283,6 +299,8 @@
                     ? '🖼️'
                     : layer.type === 'group'
                     ? '📂'
+                    : layer.name === '五角星'
+                    ? '⭐'
                     : '💠'
                 }}
               </span>
@@ -360,5 +378,9 @@
   /* 别忘了这个三角形的样式 */
   .clip-triangle {
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+  /* [新增] 五角星裁剪路径 */
+  .clip-star {
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
   }
 </style>

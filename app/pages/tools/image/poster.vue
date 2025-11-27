@@ -1,110 +1,14 @@
 <script setup lang="ts">
-  import { ref, onBeforeUnmount, shallowRef, onMounted, triggerRef, nextTick, toRaw } from 'vue'
+  import { ref, onBeforeUnmount, shallowRef, onMounted, triggerRef, nextTick, toRaw, markRaw } from 'vue'
   import EditorHeader from '~/components/EditorHeader.vue'
   import EditorSidebar from '~/components/EditorSidebar.vue'
   import EditorWorkspace from '~/components/EditorWorkspace.vue'
   import EditorSettings from '~/components/EditorSettings.vue'
   import ContextMenu from '~/components/ContextMenu.vue'
   import { Toaster, toast } from 'vue-sonner' // [新增] 引入
+  import { EDITOR_ASSETS } from '~/constants/assets'
   // --- 数据 (Assets) ---
-  const assets = {
-    templates: [
-      {
-        id: 'promo',
-        label: '促销海报',
-        preview: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
-        data: {
-          background: '#FFF1F2',
-          objects: [
-            { type: 'circle', fill: '#FDA4AF', radius: 100, left: 300, top: 300, opacity: 0.5 },
-            {
-              type: 'text',
-              content: '年中\n大促',
-              fontSize: 80,
-              left: 300,
-              top: 250,
-              fill: '#BE123C',
-              textAlign: 'center',
-              fontWeight: 'bold'
-            },
-            { type: 'text', content: '全场 5 折起', fontSize: 30, left: 300, top: 400, fill: '#881337' }
-          ]
-        }
-      },
-      {
-        id: 'hiring',
-        label: '招聘模版',
-        preview: 'linear-gradient(to top, #accbee 0%, #e7f0fd 100%)',
-        data: {
-          background: '#EFF6FF',
-          objects: [
-            { type: 'rect', fill: '#3B82F6', width: 600, height: 150, left: 300, top: 75 },
-            {
-              type: 'text',
-              content: 'WE ARE HIRING',
-              fontSize: 50,
-              left: 300,
-              top: 75,
-              fill: '#FFFFFF',
-              fontWeight: 'bold'
-            },
-            {
-              type: 'text',
-              content: '虚位以待\n诚聘精英',
-              fontSize: 60,
-              left: 300,
-              top: 300,
-              fill: '#1E40AF',
-              textAlign: 'center'
-            },
-            { type: 'rect', fill: '#1E3A8A', width: 200, height: 50, left: 300, top: 500, rx: 10, ry: 10 },
-            { type: 'text', content: '加入我们', fontSize: 24, left: 300, top: 500, fill: '#FFFFFF' }
-          ]
-        }
-      },
-      {
-        id: 'quote',
-        label: '每日金句',
-        preview: 'linear-gradient(120deg, #f6d365 0%, #fda085 100%)',
-        data: {
-          background: '#111827',
-          objects: [
-            { type: 'text', content: '“', fontSize: 120, left: 100, top: 200, fill: '#F59E0B', fontFamily: 'serif' },
-            {
-              type: 'text',
-              content: '保持热爱\n奔赴山海',
-              fontSize: 50,
-              left: 300,
-              top: 350,
-              fill: '#F3F4F6',
-              textAlign: 'center',
-              fontFamily: 'serif'
-            },
-            {
-              type: 'text',
-              content: '— DesignPro',
-              fontSize: 20,
-              left: 450,
-              top: 500,
-              fill: '#9CA3AF',
-              fontStyle: 'italic'
-            }
-          ]
-        }
-      }
-    ],
-    colors: ['#FFFFFF', '#FEF3C7', '#DBEAFE', '#FEE2E2', '#ECFCCB', '#1F2937'],
-    elements: [
-      { type: 'shape', shape: 'rect', color: '#F87171' },
-      { type: 'shape', shape: 'circle', color: '#60A5FA' },
-      { type: 'shape', shape: 'triangle', color: '#34D399' },
-      { type: 'image', url: 'https://cdn-icons-png.flaticon.com/512/1046/1046283.png' }
-    ],
-    text: [
-      { type: 'text', content: '主标题', fontSize: 60, fontWeight: 'bold' },
-      { type: 'text', content: '正文内容', fontSize: 24, fontWeight: 'normal' }
-    ]
-  }
+  const assets = EDITOR_ASSETS
 
   // --- 状态 ---
   const canvas = shallowRef<any>(null)
@@ -122,8 +26,8 @@
   // [新增] 平移与缩放相关的局部变量
   const isPanning = ref(false) // 是否按下空格键
   let isCanvasDragging = false // 是否正在拖拽画布
-  let lastPosX = 0
-  let lastPosY = 0
+  // let lastPosX = 0
+  // let lastPosY = 0
 
   // --- [新增] 图层列表状态 ---
   const layers = ref<any[]>([])
@@ -138,30 +42,37 @@
     const objects = canvas.value.getObjects()
 
     layers.value = [...objects].reverse().map((obj: any) => {
-      // 获取一个可读的名称
-      let name = '未知元素'
-      if (obj.type === 'i-text' || obj.type === 'text' || obj.type === 'textbox') {
-        name = obj.text?.slice(0, 8) + (obj.text?.length > 8 ? '...' : '') || '文字'
-      } else if (obj.type === 'image') {
-        name = '图片'
-      } else if (obj.type === 'rect') {
-        name = '矩形'
-      } else if (obj.type === 'circle') {
-        name = '圆形'
-      } else if (obj.type === 'path') {
-        name = '画笔'
-      } else if (obj.type === 'group' || obj.type === 'activeselection') {
-        // 注意小写兼容
-        name = '组合'
+      // 🟢 [修改] 优先使用 obj.name，如果没有再根据类型判断
+      let name = obj.name || '未知元素'
+
+      if (!obj.name) {
+        // 只有没名字的时候才自动推断
+        if (obj.type === 'i-text' || obj.type === 'text' || obj.type === 'textbox') {
+          name = obj.text?.slice(0, 8) + (obj.text?.length > 8 ? '...' : '') || '文字'
+        } else if (obj.type === 'image') {
+          name = '图片'
+        } else if (obj.type === 'rect') {
+          name = '矩形'
+        } else if (obj.type === 'circle') {
+          name = '圆形'
+        } else if (obj.type === 'star') {
+          name = '五角星'
+        } else if (obj.type === 'triangle') {
+          name = '三角形'
+        } else if (obj.type === 'path') {
+          name = '画笔' // 只有真正的涂鸦才叫画笔
+        } else if (obj.type === 'group' || obj.type === 'activeselection') {
+          name = '组合'
+        }
       }
 
       return {
-        id: obj.id || Math.random().toString(36).substr(2, 9), // 确保有ID
+        id: obj.id || Math.random().toString(36).substr(2, 9),
         type: obj.type,
         name: name,
         visible: obj.visible,
-        locked: obj.lockMovementX, // 简单判断，如果锁了移动X就视为锁定了
-        objectRef: obj // 存一下引用，方便操作
+        locked: obj.lockMovementX, // 简单判断
+        objectRef: markRaw(obj)
       }
     })
   }
@@ -401,25 +312,38 @@
 
   // 1. 选中图层
   // poster.vue
+  // 1. 定义 ref
+  const workspaceRef = ref<any>(null)
+
+  // 2. 修改 selectLayer 函数
+  // poster.vue
 
   const selectLayer = (layerItem: any) => {
-    if (!canvas.value || !layerItem.objectRef) return
+    // 1. 获取原始对象
+    // layerItem.objectRef 是被 Vue 代理过的 Proxy
+    // 必须用 toRaw() 转回原始 Fabric 对象，否则 canvas.contains 会返回 false
+    const obj = toRaw(layerItem.objectRef)
 
-    const obj = layerItem.objectRef
+    if (!canvas.value || !obj) return
 
-    // 【核心修复】检查对象是否还在画布上
-    // canvas.contains(obj) 是 Fabric 用来判断对象是否有效的方法
+    // 2. 检查对象是否还在画布上 (现在应该能通过了)
     if (!canvas.value.contains(obj)) {
-      console.warn('该元素已不在画布上，正在刷新列表...')
-      updateLayerList() // 发现僵尸对象，立即刷新列表移除它
+      console.warn('对象不在画布上，正在刷新列表...')
+      updateLayerList()
       return
     }
 
-    // 正常选中逻辑
+    // 3. 选中对象
     canvas.value.discardActiveObject()
     canvas.value.setActiveObject(obj)
     canvas.value.requestRenderAll()
     activeObject.value = obj
+
+    // 4. 快速定位视图
+    if (workspaceRef.value) {
+      const center = obj.getCenterPoint()
+      workspaceRef.value.panToCenter(center.x, center.y, canvas.value.width, canvas.value.height)
+    }
   }
 
   // 2. 切换显隐
@@ -544,51 +468,51 @@
     //   }
     // })
 
-    // 2. 鼠标按下 (开始平移)
-    canvas.value.on('mouse:down', (opt: any) => {
-      const evt = opt.e
-      // 如果按下了空格键 (isPanning)，进入拖拽模式
-      if (isPanning.value) {
-        isCanvasDragging = true
-        canvas.value.selection = false // 禁止框选
-        lastPosX = evt.clientX
-        lastPosY = evt.clientY
-      }
-    })
+    // // 2. 鼠标按下 (开始平移)
+    // canvas.value.on('mouse:down', (opt: any) => {
+    //   const evt = opt.e
+    //   // 如果按下了空格键 (isPanning)，进入拖拽模式
+    //   if (isPanning.value) {
+    //     isCanvasDragging = true
+    //     canvas.value.selection = false // 禁止框选
+    //     lastPosX = evt.clientX
+    //     lastPosY = evt.clientY
+    //   }
+    // })
 
-    // 3. 鼠标移动 (正在平移)
-    canvas.value.on('mouse:move', (opt: any) => {
-      if (isCanvasDragging && canvas.value) {
-        const e = opt.e
-        const vpt = canvas.value.viewportTransform // 获取视口变换矩阵
-        if (vpt) {
-          vpt[4] += e.clientX - lastPosX // 更新 X 轴偏移
-          vpt[5] += e.clientY - lastPosY // 更新 Y 轴偏移
-          canvas.value.requestRenderAll() // 重绘
-          lastPosX = e.clientX
-          lastPosY = e.clientY
-        }
-      }
-    })
+    // // 3. 鼠标移动 (正在平移)
+    // canvas.value.on('mouse:move', (opt: any) => {
+    //   if (isCanvasDragging && canvas.value) {
+    //     const e = opt.e
+    //     const vpt = canvas.value.viewportTransform // 获取视口变换矩阵
+    //     if (vpt) {
+    //       vpt[4] += e.clientX - lastPosX // 更新 X 轴偏移
+    //       vpt[5] += e.clientY - lastPosY // 更新 Y 轴偏移
+    //       canvas.value.requestRenderAll() // 重绘
+    //       lastPosX = e.clientX
+    //       lastPosY = e.clientY
+    //     }
+    //   }
+    // })
 
-    // 4. 鼠标松开 (结束平移)
-    canvas.value.on('mouse:up', () => {
-      // 必须重新设置 viewportTransform 以应用更改
-      if (canvas.value) {
-        canvas.value.setViewportTransform(canvas.value.viewportTransform)
-        isCanvasDragging = false
-        // 如果松开了鼠标，但还没松开空格，选区依然禁止；只有松开空格才恢复选区
-        if (!isPanning.value) {
-          canvas.value.selection = true
-        }
-      }
-    })
+    // // 4. 鼠标松开 (结束平移)
+    // canvas.value.on('mouse:up', () => {
+    //   // 必须重新设置 viewportTransform 以应用更改
+    //   if (canvas.value) {
+    //     canvas.value.setViewportTransform(canvas.value.viewportTransform)
+    //     isCanvasDragging = false
+    //     // 如果松开了鼠标，但还没松开空格，选区依然禁止；只有松开空格才恢复选区
+    //     if (!isPanning.value) {
+    //       canvas.value.selection = true
+    //     }
+    //   }
+    // })
 
     // === 结束 ===
 
     saveHistory()
     window.addEventListener('keydown', handleKeydown)
-    window.addEventListener('keyup', handleKeyup) // [新增] 监听松开空格
+    // window.addEventListener('keyup', handleKeyup) // [新增] 监听松开空格
   }
 
   // --- [新增] 修改画布尺寸逻辑 ---
@@ -1170,29 +1094,31 @@
     // 辅助线不计入历史记录比较好，或者你觉得需要撤销也可以计入
     // saveHistory()
   }
+  // poster.vue
+
   const addElement = (item: any, dropX?: number, dropY?: number) => {
     if (!canvas.value) return
     let left, top
+
+    // === [修改开始] 坐标计算逻辑适配 CSS 缩放 ===
     if (dropX !== undefined && dropY !== undefined) {
-      const canvasRect = canvas.value.upperCanvasEl.getBoundingClientRect()
-      const mouseX = dropX - canvasRect.left
-      const mouseY = dropY - canvasRect.top
-      const vpt = canvas.value.viewportTransform
-      if (vpt) {
-        const invertedVpt = fabric.value.util.invertTransform(vpt)
-        const point = fabric.value.util.transformPoint({ x: mouseX, y: mouseY }, invertedVpt)
-        left = point.x
-        top = point.y
-      } else {
-        left = mouseX
-        top = mouseY
-      }
+      // 1. 获取 Canvas 元素在屏幕上的实时位置（包含 CSS 平移和缩放后的结果）
+      const rect = canvas.value.upperCanvasEl.getBoundingClientRect()
+
+      // 2. 计算缩放比例 (假设 zoomLevel 是 0-100 的整数，如 50 代表 0.5)
+      // 如果你的 zoomLevel 是 ref，记得加 .value
+      const scale = zoomLevel.value / 100
+
+      // 3. 计算 Canvas 内部坐标
+      // 公式：(鼠标屏幕坐标 - Canvas屏幕左上角) / 缩放倍率
+      left = (dropX - rect.left) / scale
+      top = (dropY - rect.top) / scale
     } else {
-      // 使用 viewport 中心，确保放大后点击添加也能看到元素
-      const vpCenter = canvas.value.getVpCenter()
-      left = vpCenter.x
-      top = vpCenter.y
+      // 点击添加时，默认放到画布中心
+      left = canvas.value.width / 2
+      top = canvas.value.height / 2
     }
+    // === [修改结束] ===
 
     const commonProps = { left, top, originX: 'center', originY: 'center' }
 
@@ -1203,12 +1129,12 @@
         fontWeight: item.fontWeight,
         fontFamily: 'Arial',
         fill: '#333333',
-        // [新增] 预设高级属性，方便后续在 Settings 面板中绑定
-        charSpacing: 0, // 字间距
-        lineHeight: 1.16, // 行高 (Fabric 默认值)
-        shadow: null, // 阴影
-        stroke: null, // 描边颜色
-        strokeWidth: 0 // 描边粗细
+        // [新增] 预设高级属性
+        charSpacing: 0,
+        lineHeight: 1.16,
+        shadow: null,
+        stroke: null,
+        strokeWidth: 0
       })
       canvas.value.add(text)
       canvas.value.setActiveObject(text)
@@ -1218,6 +1144,18 @@
       if (item.shape === 'rect') shape = new fabric.value.Rect(opts)
       if (item.shape === 'circle') shape = new fabric.value.Circle({ ...opts, radius: 50 })
       if (item.shape === 'triangle') shape = new fabric.value.Triangle(opts)
+      // [新增] 五角星支持
+      if (item.shape === 'star') {
+        // 这是一个标准的五角星 Path
+        const starPath = 'M 0 -50 L 11 -15 L 47 -15 L 17 9 L 29 43 L 0 25 L -29 43 L -17 9 L -47 -15 L -11 -15 Z'
+        shape = new fabric.value.Path(starPath, {
+          ...opts,
+          scaleX: 1, // Path 需要单独调整缩放
+          scaleY: 1
+        })
+        // Path 的宽高计算比较特殊，这里手动缩放一下使其接近 100px
+        shape.scaleToWidth(100)
+      }
       if (shape) {
         canvas.value.add(shape)
         canvas.value.setActiveObject(shape)
@@ -1227,6 +1165,7 @@
         .then((img: any) => {
           if (!img) return
           img.set({ ...commonProps })
+          // 限制一下图片初始大小，避免太大了
           if (img.width > 300) img.scaleToWidth(300)
           canvas.value.add(img)
           canvas.value.setActiveObject(img)
@@ -1440,6 +1379,7 @@
         @toggle-layer-lock="toggleLayerLock" />
 
       <EditorWorkspace
+        ref="workspaceRef"
         :zoom-level="zoomLevel"
         :show-grid="showGrid"
         @canvas-ready="initCanvas"
