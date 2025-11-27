@@ -2,14 +2,14 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-26 16:47:10
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-27 14:36:57
+ * @LastEditTime: 2025-11-27 14:48:00
  * @FilePath: \xiao-nuxt4\app\components\EditorWorkspace.vue
  * @Description: 注释
 -->
 <script setup lang="ts">
   import { onMounted, onUnmounted, ref } from 'vue'
 
-  defineProps<{
+  const props = defineProps<{
     zoomLevel: number
     showGrid?: boolean
   }>()
@@ -126,8 +126,17 @@
 
   // ... panToCenter, resetView, defineExpose 保持不变 ...
   const panToCenter = (targetX: number, targetY: number, canvasWidth: number, canvasHeight: number) => {
-    translateX.value = canvasWidth / 2 - targetX
-    translateY.value = canvasHeight / 2 - targetY
+    // 1. 获取当前的缩放比例 (例如 0.5)
+    const scale = props.zoomLevel / 100
+
+    // 2. 计算画布内部的距离 (画布像素)
+    const distanceX = canvasWidth / 2 - targetX
+    const distanceY = canvasHeight / 2 - targetY
+
+    // 3. 转换为屏幕像素 (Screen Pixels)
+    // 必须乘以 scale，因为 translateX 是作用在视觉上的
+    translateX.value = distanceX * scale
+    translateY.value = distanceY * scale
   }
   const resetView = () => {
     translateX.value = 0
