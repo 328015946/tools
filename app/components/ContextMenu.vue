@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-26 16:56:37
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-26 16:56:47
+ * @LastEditTime: 2025-11-27 11:08:13
  * @FilePath: \xiao-nuxt4\app\components\ContextMenu.vue
  * @Description: 注释
 -->
@@ -15,6 +15,7 @@
     y: number
     hasSelection: boolean
     isGroup: boolean
+    selectionType?: string // [新增] 接收选中对象的类型
   }>()
 
   const emit = defineEmits([
@@ -34,6 +35,13 @@
       :style="{ left: x + 'px', top: y + 'px' }"
       @click.stop>
       <template v-if="hasSelection">
+        <!-- [新增] 如果是图片，显示设为背景 -->
+        <div v-if="selectionType === 'image'">
+          <button class="menu-item text-indigo-600" @click="emit('action', 'set-bg')">
+            <span>🖼️ 设为背景</span>
+          </button>
+          <div class="border-t my-1"></div>
+        </div>
         <button class="menu-item" @click="emit('action', 'copy')">
           <span>复制</span> <span class="text-gray-400 text-xs">Ctrl+C</span>
         </button>
