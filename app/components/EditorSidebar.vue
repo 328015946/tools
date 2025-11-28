@@ -456,9 +456,11 @@
               "></div>
             <svg
               v-else-if="item.type === 'path'"
-              viewBox="0 0 1024 1024"
+              :viewBox="item.viewBox || '0 0 1024 1024'"
               class="w-10 h-10 transition-transform group-hover:scale-110"
-              :style="{ fill: item.fill || item.color || '#000' }">
+              :style="{ fill: item.fill || item.color || '#000' }"
+              preserveAspectRatio="xMidYMid meet">
+              <!-- preserveAspectRatio="xMidYMid meet" 意思是：无论比例如何，强制居中并完整显示 -->
               <path :d="item.path" />
             </svg>
             <img v-else :src="item.url" class="w-12 h-12 object-contain transition-transform group-hover:scale-110" />
