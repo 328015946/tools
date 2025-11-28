@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-26 16:46:56
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-27 11:39:06
+ * @LastEditTime: 2025-11-27 18:47:33
  * @FilePath: \xiao-nuxt4\app\components\EditorHeader.vue
  * @Description: 注释
 -->
@@ -104,7 +104,7 @@
           type="number"
           :value="canvasWidth"
           @change="e => handleInput(e, 'w')"
-          class="w-10 bg-transparent text-xs font-mono text-gray-700 outline-none text-right" />
+          class="w-12 bg-transparent text-xs font-mono text-gray-700 outline-none text-right" />
       </div>
 
       <span class="text-gray-300">×</span>
@@ -117,7 +117,7 @@
           type="number"
           :value="canvasHeight"
           @change="e => handleInput(e, 'h')"
-          class="w-10 bg-transparent text-xs font-mono text-gray-700 outline-none text-right" />
+          class="w-12 bg-transparent text-xs font-mono text-gray-700 outline-none text-right" />
       </div>
       <span class="text-[10px] text-gray-400 ml-1">px</span>
     </div>

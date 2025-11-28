@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-26 16:47:10
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-27 14:48:00
+ * @LastEditTime: 2025-11-27 18:41:25
  * @FilePath: \xiao-nuxt4\app\components\EditorWorkspace.vue
  * @Description: 注释
 -->
@@ -12,6 +12,7 @@
   const props = defineProps<{
     zoomLevel: number
     showGrid?: boolean
+    isLoaded?: boolean //
   }>()
 
   const emit = defineEmits(['canvas-ready', 'update-zoom', 'drop-element', 'workspace-resize'])
@@ -147,7 +148,7 @@
 
 <template>
   <div
-    class="bg-gray-100 flex-1 relative overflow-hidden flex items-center justify-center p-10 select-none"
+    class="bg-gray-100 flex-1 relative overflow-hidden flex items-start justify-center p-10 select-none"
     ref="workspaceEl"
     @dragover.prevent
     @drop="handleDrop"
@@ -156,12 +157,19 @@
       内容包裹层
       注意：这里移除了原本挂在最外层的 mousedown/mousemove，移到了遮罩层上
     -->
+    <!-- 🟢 [新增] Loading 遮罩层 -->
+    <!-- 当 !isLoaded 时显示，居中悬浮 -->
+    <div v-if="!isLoaded" class="absolute inset-0 z-50 flex flex-col items-center justify-center bg-gray-100">
+      <!-- 转圈动画 -->
+      <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+      <p class="mt-4 text-sm text-gray-500 font-medium tracking-wide">初始化设计器...</p>
+    </div>
     <div
       class="relative shadow-lg bg-white transition-transform ease-out will-change-transform"
       :class="isDragging ? 'duration-0' : 'duration-200'"
       :style="{
         transform: `translate(${translateX}px, ${translateY}px) scale(${zoomLevel / 100})`,
-        transformOrigin: 'center center'
+        transformOrigin: 'center top'
       }">
       <canvas ref="canvasEl"></canvas>
       <div v-if="showGrid" class="absolute inset-0 pointer-events-none z-10 grid-pattern"></div>

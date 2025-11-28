@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { ref, watch } from 'vue'
-
+  import LayerItem from './LayerItem.vue' // [新增] 引入组件
   // [新增] 接收 layers 和 activeObject
   const props = defineProps<{
     assets: any
@@ -19,11 +19,91 @@
     // [新增]
     'select-layer',
     'toggle-layer-visible',
-    'toggle-layer-lock'
+    'toggle-layer-lock',
+    'reorder-layer', // [新增] 排序事件
+    'toggle-group-expand' // [新增] 折叠事件
   ])
+  // 1. 定义菜单配置 (集中管理 Icon、名称、侧边栏标题)
+  const menus = [
+    { key: 'templates', icon: '🎨', label: '背景', title: '背景设置' },
+    { key: 'elements', icon: '🧩', label: '素材', title: '添加素材' },
+    { key: 'components', icon: '📦', label: '组件', title: '图表组件' },
+    { key: 'text', icon: 'T', label: '文字', title: '添加文字' },
+    { key: 'draw', icon: '🖊️', label: '画笔', title: '自由绘制' },
+    { key: 'upload', icon: '☁️', label: '上传', title: '本地上传' }
+  ]
 
-  const activeTab = ref<'templates' | 'elements' | 'text' | 'upload' | 'draw' | 'layers'>('elements')
+  // 类型定义自动推导，或者手动指定
+  type TabType = 'templates' | 'elements' | 'components' | 'text' | 'draw' | 'upload' | 'layers'
+
+  const activeTab = ref<'templates' | 'elements' | 'components' | 'text' | 'upload' | 'draw' | 'layers'>('elements')
   const fileInput = ref<HTMLInputElement | null>(null)
+  // 2. [优化] 使用 computed 计算当前侧边栏标题
+  // 不再需要在模板里写一堆 if-else
+  const currentTitle = computed(() => {
+    if (activeTab.value === 'layers') return '图层管理'
+    const currentMenu = menus.find(m => m.key === activeTab.value)
+    return currentMenu ? currentMenu.title : '属性设置'
+  })
+
+  // --- 拖拽排序逻辑 ---
+  const dragOverId = ref<string | null>(null)
+  const dragPosition = ref<'top' | 'bottom' | null>(null) // 指示线位置
+
+  // 开始拖拽
+  const onDragStart = (data: any) => {
+    // 记录正在拖拽的数据
+    // dataTransfer.setData...
+  }
+
+  // 拖拽悬停
+  const onDragOver = (e: DragEvent) => {
+    const target = (e.target as HTMLElement).closest('.layer-node')
+    if (!target) return
+
+    // 计算鼠标在目标元素的上半部还是下半部
+    const rect = target.getBoundingClientRect()
+    const offset = e.clientY - rect.top
+    if (offset < rect.height / 2) {
+      dragPosition.value = 'top'
+    } else {
+      dragPosition.value = 'bottom'
+    }
+  }
+
+  // 放置
+  const onDropItem = ({ targetId, targetItem }: any) => {
+    // 获取正在拖拽的元素ID（这里简化处理，实际可以通过 dataTransfer 或全局变量传）
+    // 为了简单，我们让 LayerItem 把 drag-start 传出的 item 暂存一下，或者让 Parent 处理
+    // 最佳实践：emit 完整的事件
+    emit('reorder-layer', {
+      targetId,
+      position: dragPosition.value
+    })
+
+    // 重置状态
+    dragOverId.value = null
+    dragPosition.value = null
+  }
+
+  // 暂存被拖拽的ID
+  const draggingId = ref<string | null>(null)
+  const handleLayerDragStart = (info: any) => {
+    draggingId.value = info.id
+  }
+
+  const handleLayerDrop = (info: any) => {
+    if (!draggingId.value || draggingId.value === info.targetId) return
+
+    emit('reorder-layer', {
+      dragId: draggingId.value,
+      targetId: info.targetId,
+      position: dragPosition.value
+    })
+
+    draggingId.value = null
+    dragPosition.value = null
+  }
 
   // --- 画笔状态 ---
   const isDrawing = ref(false)
@@ -68,36 +148,16 @@
     <!-- 1. 一级导航 -->
     <nav class="w-16 flex flex-col items-center py-4 gap-6 border-r border-gray-100 shrink-0">
       <button
-        v-for="tab in ['templates', 'elements', 'text', 'draw', 'upload']"
-        :key="tab"
-        @click="activeTab = tab as any"
+        v-for="menu in menus"
+        :key="menu.key"
+        @click="activeTab = menu.key as any"
         class="flex flex-col items-center gap-1 p-2 rounded-lg transition w-12"
-        :class="activeTab === tab ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'">
-        <span class="text-xl capitalize">
-          {{
-            tab === 'templates'
-              ? '🎨 '
-              : tab === 'elements'
-              ? '🧩'
-              : tab === 'text'
-              ? 'T'
-              : tab === 'draw'
-              ? '🖊️'
-              : '☁️'
-          }}
-        </span>
-        <span class="text-[10px]">{{
-          tab === 'templates'
-            ? '背景'
-            : tab === 'elements'
-            ? '素材'
-            : tab === 'text'
-            ? '文字'
-            : tab === 'draw'
-            ? '画笔'
-            : '上传'
-        }}</span>
+        :class="activeTab === menu.key ? 'bg-indigo-50 text-indigo-600' : 'text-gray-500 hover:text-gray-900'">
+        <span class="text-xl capitalize">{{ menu.icon }}</span>
+        <span class="text-[10px]">{{ menu.label }}</span>
       </button>
+
+      <!-- 图层按钮 (单独保留，因为它在 UI 逻辑上常驻底部或特殊处理) -->
       <button
         @click="activeTab = 'layers'"
         class="flex flex-col items-center gap-1 p-2 rounded-lg transition w-12"
@@ -111,19 +171,7 @@
     <aside class="w-64 flex flex-col">
       <div class="p-4 border-b border-gray-100">
         <h2 class="font-bold text-gray-800 text-lg">
-          {{
-            activeTab === 'templates'
-              ? '背景设置'
-              : activeTab === 'elements'
-              ? '添加素材'
-              : activeTab === 'text'
-              ? '添加文字'
-              : activeTab === 'draw'
-              ? '自由绘制'
-              : activeTab === 'upload'
-              ? '本地上传'
-              : '图层管理'
-          }}
+          {{ currentTitle }}
         </h2>
       </div>
 
@@ -250,7 +298,20 @@
             <img v-else :src="item.url" class="w-12 h-12 object-contain transition-transform group-hover:scale-110" />
           </div>
         </div>
-
+        <!-- 🟢 [新增] 组件列表 -->
+        <div v-if="activeTab === 'components'" class="grid grid-cols-2 gap-3">
+          <div
+            v-for="comp in assets.components"
+            :key="comp.id"
+            draggable="true"
+            @dragstart="e => handleDragStart(e, comp)"
+            @click="emit('add-element', comp)"
+            class="bg-gray-50 hover:bg-gray-100 rounded-lg p-2 cursor-pointer border border-transparent hover:border-indigo-200 transition group flex flex-col items-center gap-2">
+            <!-- 预览图 -->
+            <img :src="comp.preview" class="w-full h-20 object-contain" />
+            <span class="text-xs text-gray-500 font-medium">{{ comp.label }}</span>
+          </div>
+        </div>
         <!-- === 4. 文字 (已恢复原样) === -->
         <div v-if="activeTab === 'text'" class="space-y-3">
           <div
@@ -273,101 +334,27 @@
           <button @click="fileInput?.click()" class="bg-indigo-600 text-white px-4 py-2 rounded">选择图片</button>
           <input type="file" ref="fileInput" @change="handleUpload" hidden />
         </div>
-        <div v-if="activeTab === 'layers'" class="space-y-2">
+        <!-- === 图层管理 (修改后) === -->
+        <div v-if="activeTab === 'layers'" class="space-y-1">
           <div v-if="!layers || layers.length === 0" class="text-center text-gray-400 py-10 text-sm">
             画布空空如也 🍃
           </div>
 
-          <div
-            v-for="layer in layers"
+          <!-- 使用递归组件 -->
+          <LayerItem
+            v-for="(layer, idx) in layers"
             :key="layer.id"
-            @click="emit('select-layer', layer)"
-            class="flex items-center justify-between p-2 rounded border transition cursor-pointer group select-none"
-            :class="[
-              activeObject === layer.objectRef
-                ? 'bg-indigo-50 border-indigo-300 ring-1 ring-indigo-200'
-                : 'bg-white border-gray-100 hover:border-indigo-200 hover:bg-gray-50'
-            ]">
-            <!-- 左侧：图标 + 名称 -->
-            <div class="flex items-center gap-3 overflow-hidden">
-              <!-- 根据类型显示不同 Icon -->
-              <span class="text-lg opacity-70">
-                {{
-                  layer.type.includes('text')
-                    ? 'T'
-                    : layer.type === 'image'
-                    ? '🖼️'
-                    : layer.type === 'group'
-                    ? '📂'
-                    : layer.name === '五角星'
-                    ? '⭐'
-                    : '💠'
-                }}
-              </span>
-              <span class="text-sm truncate font-medium text-gray-700">
-                {{ layer.name }}
-              </span>
-            </div>
-
-            <!-- 右侧：操作按钮 -->
-            <div
-              class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-              :class="{ 'opacity-100': !layer.visible || layer.locked }">
-              <!-- 如果状态非默认，常驻显示 -->
-
-              <!-- 显隐按钮 -->
-              <button
-                @click.stop="emit('toggle-layer-visible', layer)"
-                class="p-1 rounded hover:bg-gray-200 text-gray-500"
-                title="显示/隐藏">
-                <svg v-if="layer.visible" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                <svg v-else class="w-4 h-4 text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                </svg>
-              </button>
-
-              <!-- 锁定按钮 -->
-              <button
-                @click.stop="emit('toggle-layer-lock', layer)"
-                class="p-1 rounded hover:bg-gray-200 text-gray-500"
-                title="锁定/解锁">
-                <svg
-                  v-if="layer.locked"
-                  class="w-4 h-4 text-red-400"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-                <svg v-else class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                </svg>
-              </button>
-            </div>
-          </div>
+            :item="layer"
+            :depth="0"
+            :index="idx"
+            :active-id="activeObject?.id"
+            @select="emit('select-layer', $event)"
+            @toggle-visible="emit('toggle-layer-visible', $event)"
+            @toggle-lock="emit('toggle-layer-lock', $event)"
+            @toggle-expand="emit('toggle-group-expand', $event)"
+            @drag-start="handleLayerDragStart"
+            @drag-over="onDragOver"
+            @drop-item="handleLayerDrop" />
         </div>
       </div>
     </aside>
