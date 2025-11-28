@@ -351,36 +351,89 @@
       </div>
 
       <!-- === D. 普通形状 (矩形/圆) === -->
-      <div v-if="isShape" class="space-y-3 pb-4 border-b border-gray-100">
-        <label class="section-title">填充与描边</label>
+      <!-- EditorSettings.vue -->
 
+      <!-- === D. 普通形状 (矩形/圆) === -->
+      <div v-if="isShape" class="space-y-4 pb-4 border-b border-gray-100">
+        <label class="section-title">形状外观</label>
+
+        <!-- 1. 填充颜色 -->
         <div class="flex items-center justify-between">
           <span class="text-sm text-gray-600">填充颜色</span>
-          <input
-            type="color"
-            :value="normalizeColor(activeObject.fill)"
-            @input="(e:any) => update('fill', e.target.value)"
-            class="color-picker" />
+          <div class="flex gap-2 items-center">
+            <!-- 增加一个透明按钮 -->
+            <button
+              @click="update('fill', 'transparent')"
+              class="w-4 h-4 rounded border border-gray-300 bg-white flex items-center justify-center overflow-hidden"
+              title="无填充">
+              <span class="text-[8px] text-red-500">✕</span>
+            </button>
+            <input
+              type="color"
+              :value="normalizeColor(activeObject.fill)"
+              @input="(e:any) => update('fill', e.target.value)"
+              class="color-picker" />
+          </div>
         </div>
 
-        <div class="flex items-center justify-between">
-          <span class="text-sm text-gray-600">描边颜色</span>
-          <input
-            type="color"
-            :value="normalizeColor(activeObject.stroke || '#000000')"
-            @input="(e:any) => update('stroke', e.target.value)"
-            class="color-picker" />
-        </div>
-
-        <div class="space-y-1">
-          <span class="text-xs text-gray-500">描边宽度: {{ activeObject.strokeWidth || 0 }}</span>
+        <!-- 2. 🟢 [新增] 圆角设置 (仅对矩形有效) -->
+        <div v-if="activeObject.type === 'rect'" class="space-y-1">
+          <div class="flex justify-between text-xs text-gray-500">
+            <span>圆角半径 (Radius)</span>
+            <span class="font-mono">{{ activeObject.rx || 0 }}px</span>
+          </div>
           <input
             type="range"
             min="0"
-            max="20"
-            :value="activeObject.strokeWidth || 0"
-            @input="(e:any) => update('strokeWidth', parseInt(e.target.value))"
+            max="100"
+            :value="activeObject.rx || 0"
+            @input="(e:any) => {
+     // 确保 rx 和 ry 始终相等，这就是圆角，不是椭圆角
+     const val = parseInt(e.target.value);
+     update('rx', val);
+     update('ry', val);
+  }"
             class="range-input" />
+        </div>
+
+        <!-- 3. 描边设置 (增强版：支持虚线) -->
+        <div class="space-y-3 border-t border-gray-50 pt-2">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-gray-600">描边颜色</span>
+            <input
+              type="color"
+              :value="normalizeColor(activeObject.stroke || '#000000')"
+              @input="(e:any) => update('stroke', e.target.value)"
+              class="color-picker" />
+          </div>
+
+          <div class="space-y-1">
+            <span class="text-xs text-gray-500">描边粗细: {{ activeObject.strokeWidth || 0 }}</span>
+            <input
+              type="range"
+              min="0"
+              max="20"
+              :value="activeObject.strokeWidth || 0"
+              @input="(e:any) => update('strokeWidth', parseInt(e.target.value))"
+              class="range-input" />
+          </div>
+
+          <!-- 🟢 [新增] 边框样式 (实线/虚线) -->
+          <div class="flex gap-2">
+            <span class="text-xs text-gray-500 mt-1">边框样式:</span>
+            <button
+              @click="update('strokeDashArray', null)"
+              class="flex-1 py-1 border rounded text-xs hover:bg-gray-50"
+              :class="!activeObject.strokeDashArray ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : ''">
+              实线
+            </button>
+            <button
+              @click="update('strokeDashArray', [10, 10])"
+              class="flex-1 py-1 border rounded text-xs hover:bg-gray-50"
+              :class="activeObject.strokeDashArray ? 'bg-indigo-50 text-indigo-600 border-indigo-200' : ''">
+              虚线
+            </button>
+          </div>
         </div>
       </div>
 

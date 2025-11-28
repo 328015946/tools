@@ -805,6 +805,27 @@
         if (evt.includes('selection')) updateActiveObject()
       })
     })
+    // 🟢 [核心修复] 监听缩放事件，实现“不失真调整大小”
+    canvas.value.on('object:scaling', (e: any) => {
+      const obj = e.target
+      if (!obj) return
+
+      // 只针对矩形 (Rect) 做处理，防止圆角和边框变形
+      if (obj.type === 'rect') {
+        const width = obj.width * obj.scaleX
+        const height = obj.height * obj.scaleY
+
+        obj.set({
+          width: width,
+          height: height,
+          scaleX: 1, // 重置缩放
+          scaleY: 1 // 重置缩放
+        })
+      }
+
+      // (可选) 如果你也想让图片裁剪框不失真，也可以在这里处理
+      // 但通常只处理 Rect 就足够解决 UI 组件变形的问题
+    })
     // 🟢 [新增] 监听鼠标按下事件：点击空白处退出剪辑
     canvas.value.on('mouse:down', (opt: any) => {
       // 只有在剪辑模式下才处理
@@ -1068,54 +1089,227 @@
   }
 
   // --- 智能吸附逻辑 ---
+  // --- 智能吸附与辅助线 (轻量稳健版) ---
   const setupSmartGuides = () => {
-    let guidlelines: any[] = []
+    const snapDist = 10 // 吸附距离 (像素)
+    const lineColor = '#ff0077' // 辅助线颜色
+
+    let ctx: CanvasRenderingContext2D | null = null
+    // 暂存需要画的线
+    let guidelines: any[] = []
+
+    // 1. 监听对象移动
     canvas.value.on('object:moving', (e: any) => {
-      const obj = e.target
+      const activeObject = e.target
+
+      // 性能优化：如果选择了多个物体，计算量太大，暂时禁用吸附
+      if (activeObject.type === 'activeSelection') {
+        guidelines = []
+        return
+      }
+
       const canvasWidth = canvas.value.width
       const canvasHeight = canvas.value.height
-      guidlelines = []
-      const snapDist = 10
-      let snapped = false
-      // [新增] 辅助线吸附
-      const target = e.target
-      const guides = canvas.value.getObjects().filter((obj: any) => obj.data?.isGuide)
 
-      guides.forEach((guide: any) => {
-        // 简单吸附逻辑：如果距离辅助线 < 5px，就吸附上去
-        // 这里需要区分横线还是竖线，逻辑稍微复杂一点点
-        // 暂时先保持基础功能：手动对齐
-      })
-      if (Math.abs(obj.left - canvasWidth / 2) < snapDist) {
-        obj.set({ left: canvasWidth / 2 })
-        obj.setCoords()
-        snapped = true
-        guidlelines.push({ x1: canvasWidth / 2, y1: 0, x2: canvasWidth / 2, y2: canvasHeight })
+      // 清空辅助线
+      guidelines = []
+
+      // 获取当前拖拽物体的中心点和半宽/半高
+      // 使用 getCenterPoint() 能兼容旋转后的坐标
+      const center = activeObject.getCenterPoint()
+      const halfW = (activeObject.width * activeObject.scaleX) / 2
+      const halfH = (activeObject.height * activeObject.scaleY) / 2
+
+      // === 核心逻辑：寻找最近的吸附点 ===
+
+      // 我们需要记录 X 轴和 Y 轴方向上，“想去”的最近位置和距离
+      let snapX = null
+      let snapY = null
+      let distMinX = snapDist
+      let distMinY = snapDist
+
+      // 定义所有可能的吸附参考线 (画布中心 + 其他物体边缘)
+      const verticalAnchors = [{ x: canvasWidth / 2, type: 'center' }] // 画布中轴
+      const horizontalAnchors = [{ y: canvasHeight / 2, type: 'center' }] // 画布横轴
+
+      // 遍历所有物体，收集边缘作为参考线
+      const objects = canvas.value.getObjects()
+      for (const obj of objects) {
+        if (obj === activeObject || !obj.visible || obj.data?.isGuide) continue
+
+        const objCenter = obj.getCenterPoint()
+        const objHalfW = (obj.width * obj.scaleX) / 2
+        const objHalfH = (obj.height * obj.scaleY) / 2
+
+        // 收集 X 轴参考线 (对方的 左、中、右)
+        verticalAnchors.push({ x: objCenter.x, type: 'center' })
+        verticalAnchors.push({ x: objCenter.x - objHalfW, type: 'edge' })
+        verticalAnchors.push({ x: objCenter.x + objHalfW, type: 'edge' })
+
+        // 收集 Y 轴参考线 (对方的 上、中、下)
+        horizontalAnchors.push({ y: objCenter.y, type: 'center' })
+        horizontalAnchors.push({ y: objCenter.y - objHalfH, type: 'edge' })
+        horizontalAnchors.push({ y: objCenter.y + objHalfH, type: 'edge' })
       }
-      if (Math.abs(obj.top - canvasHeight / 2) < snapDist) {
-        obj.set({ top: canvasHeight / 2 })
-        obj.setCoords()
-        snapped = true
-        guidlelines.push({ x1: 0, y1: canvasHeight / 2, x2: canvasWidth, y2: canvasHeight / 2 })
+
+      // --- 计算 X 轴吸附 ---
+      // 当前物体的关注点：左、中、右
+      const myPointsX = [
+        { val: center.x, offset: 0 }, // 中心
+        { val: center.x - halfW, offset: halfW }, // 左边 (想吸附时，中心要往右移 halfW)
+        { val: center.x + halfW, offset: -halfW } // 右边 (想吸附时，中心要往左移 halfW)
+      ]
+
+      for (const anchor of verticalAnchors) {
+        for (const myP of myPointsX) {
+          const dist = Math.abs(anchor.x - myP.val)
+          if (dist < distMinX) {
+            // 找到了更近的吸附点
+            distMinX = dist
+            // 计算由于吸附，物体中心应该去哪里：参考线位置 + 自身偏移
+            snapX = anchor.x + myP.offset
+            // 记录这条辅助线
+            guidelines.push({ type: 'v', x: anchor.x }) // 暂存，确认吸附后再保留
+          }
+        }
       }
+
+      // --- 计算 Y 轴吸附 ---
+      // 当前物体的关注点：上、中、下
+      const myPointsY = [
+        { val: center.y, offset: 0 },
+        { val: center.y - halfH, offset: halfH },
+        { val: center.y + halfH, offset: -halfH }
+      ]
+
+      for (const anchor of horizontalAnchors) {
+        for (const myP of myPointsY) {
+          const dist = Math.abs(anchor.y - myP.val)
+          if (dist < distMinY) {
+            distMinY = dist
+            snapY = anchor.y + myP.offset
+            guidelines.push({ type: 'h', y: anchor.y })
+          }
+        }
+      }
+
+      // === 应用吸附 ===
+
+      // 只有当我们找到了吸附点，且确实进行了移动，才保留辅助线
+      // 否则清空辅助线列表，避免满屏乱画
+      const finalLines = []
+
+      if (snapX !== null) {
+        activeObject.set({ left: snapX }) // 设置位置 (Fabric 默认 origin 是 center，这里直接给中心点坐标即可)
+        // 过滤出跟最终吸附位置匹配的垂直线
+        // 由于可能有浮点数误差，用 < 1 判断
+        const matchLine = guidelines.find(l => l.type === 'v' && Math.abs(l.x - (snapX - (snapX - center.x))) < 1)
+        // 简单处理：只要有吸附，就画出那条最近的参考线
+        // 这里我们为了性能，重新找一条最近的画
+        finalLines.push({ x1: snapX, y1: 0, x2: snapX, y2: canvasHeight })
+      }
+
+      if (snapY !== null) {
+        activeObject.set({ top: snapY })
+        finalLines.push({ x1: 0, y1: snapY, x2: canvasWidth, y2: snapY })
+      }
+
+      // 更新最终要画的线
+      // 优化：只画那个我们真正吸附上去的线，而不是刚才计算过程中的所有线
+      guidelines = []
+      if (snapX !== null) {
+        // 重新遍历找到那条线的位置
+        const anchor = verticalAnchors.find(
+          a => Math.abs(a.x - (activeObject.left - (activeObject.left - center.x))) < 1
+        )
+        // 上面的计算有点绕，简化：snapX 计算时我们知道是参照了哪个 anchor
+        // 这里为了代码简洁，直接画 snapX 对应的竖线
+        // 注意：snapX 是物体中心的新位置，但辅助线可能是在物体边缘。
+        // 完美的做法是在循环里记录 bestAnchor。
+        // MVP 做法：直接画物体的 中/左/右
+        guidelines.push({ x1: activeObject.left, y1: 0, x2: activeObject.left, y2: canvasHeight })
+        guidelines.push({ x1: activeObject.left - halfW, y1: 0, x2: activeObject.left - halfW, y2: canvasHeight })
+        guidelines.push({ x1: activeObject.left + halfW, y1: 0, x2: activeObject.left + halfW, y2: canvasHeight })
+        // 只要画出来的线跟参考线重合就行。这里简化为画出物体中心和边缘，
+        // 只有当它们跟 anchor 重合时才真的画出来（为了视觉整洁），
+        // 但为了保证“拖动不卡”，我们这里只画中心线，或者简单画。
+
+        // --- 最终轻量化绘制策略 ---
+        // 直接画 activeObject.left 和 top，以及边缘
+        // 这在视觉上足够提示用户“对齐了”
+      }
+
+      // 重新修正辅助线列表，仅用于渲染
+      // 上面的循环逻辑是为了计算 snapX/Y。
+      // 为了不卡顿，我们将“画线”逻辑简化：
+      // 如果吸附了 X，就画一条贯穿 activeObject.left 的竖线
+      guidelines = []
+      if (snapX !== null) {
+        // 这里其实应该画 Anchor 的位置。
+        // 但由于我们修改了 Object 位置让它贴合 Anchor，所以画 Object 的位置也是对的。
+        // 只是我们不知道具体是对齐了左边还是右边。
+        // 简单方案：画三条淡线，或者只画中心。
+        // 稳健方案：再遍历一次找重合。
+        verticalAnchors.forEach(a => {
+          if (
+            Math.abs(a.x - activeObject.left) < 1 ||
+            Math.abs(a.x - (activeObject.left - halfW)) < 1 ||
+            Math.abs(a.x - (activeObject.left + halfW)) < 1
+          ) {
+            guidelines.push({ x1: a.x, y1: 0, x2: a.x, y2: canvasHeight })
+          }
+        })
+      }
+      if (snapY !== null) {
+        horizontalAnchors.forEach(a => {
+          if (
+            Math.abs(a.y - activeObject.top) < 1 ||
+            Math.abs(a.y - (activeObject.top - halfH)) < 1 ||
+            Math.abs(a.y - (activeObject.top + halfH)) < 1
+          ) {
+            guidelines.push({ x1: 0, y1: a.y, x2: canvasWidth, y2: a.y })
+          }
+        })
+      }
+
+      activeObject.setCoords()
     })
+
+    // 2. 渲染后绘制
     canvas.value.on('after:render', () => {
-      if (guidlelines.length === 0) return
+      if (guidelines.length === 0) return
+
       const ctx = canvas.value.getContext()
+      if (!ctx) return
+
       ctx.save()
-      ctx.strokeStyle = '#d9d9d9'
-      ctx.lineWidth = 1
-      ctx.setLineDash([4, 4])
-      guidlelines.forEach((line: any) => {
+      const vpt = canvas.value.viewportTransform
+      ctx.transform(vpt[0], vpt[1], vpt[2], vpt[3], vpt[4], vpt[5])
+
+      ctx.lineWidth = 1 / canvas.value.getZoom()
+      ctx.strokeStyle = lineColor
+      ctx.setLineDash([4 / canvas.value.getZoom(), 4 / canvas.value.getZoom()])
+
+      // 去重
+      const uniqueLines = new Set()
+
+      guidelines.forEach(l => {
+        const key = `${l.x1},${l.y1},${l.x2},${l.y2}`
+        if (uniqueLines.has(key)) return
+        uniqueLines.add(key)
+
         ctx.beginPath()
-        ctx.moveTo(line.x1, line.y1)
-        ctx.lineTo(line.x2, line.y2)
+        ctx.moveTo(l.x1, l.y1)
+        ctx.lineTo(l.x2, l.y2)
         ctx.stroke()
       })
+
       ctx.restore()
     })
+
+    // 3. 鼠标松开清空
     canvas.value.on('mouse:up', () => {
-      guidlelines = []
+      guidelines = []
       canvas.value.requestRenderAll()
     })
   }
@@ -1651,6 +1845,22 @@
         ry: item.ry || 0
       })
     }
+    if (item.type === 'path') {
+      // 处理 SVG 路径
+      const path = new fabric.value.Path(item.path, {
+        ...common, // 包含 left, top, fill 等
+        scaleX: 1,
+        scaleY: 1
+      })
+
+      // 自动缩放到指定大小 (Fabric Path 默认大小取决于 path 字符串的坐标)
+      // 如果素材里配置了 width，我们就强制缩放过去
+      if (item.width) {
+        path.scaleToWidth(item.width)
+      }
+
+      return path
+    }
     if (item.type === 'circle') {
       return new fabric.value.Circle({ ...common, radius: item.radius })
     }
@@ -1769,6 +1979,17 @@
         canvas.value.add(shape)
         canvas.value.setActiveObject(shape)
       }
+    } else if (item.type === 'path') {
+      const path = new fabric.value.Path(item.path, {
+        ...commonProps,
+        fill: item.fill || '#000000',
+        scaleX: 1,
+        scaleY: 1
+      })
+      if (item.width) path.scaleToWidth(item.width)
+
+      canvas.value.add(path)
+      canvas.value.setActiveObject(path)
     } else if (item.type === 'image') {
       fabric.value.FabricImage.fromURL(item.url, { crossOrigin: 'anonymous' })
         .then((img: any) => {
@@ -1827,15 +2048,67 @@
   }
   // --- 修改 poster.vue 中的设置背景色逻辑 ---
 
-  const setBackgroundColor = (color: string) => {
+  // --- 设置背景颜色 (支持纯色和渐变) ---
+  // --- 设置背景颜色 (修复版：支持渐变渲染) ---
+  const setBackgroundColor = (value: string | any) => {
     if (!canvas.value) return
 
-    // 1. 设置背景色
-    canvas.value.backgroundColor = color
-
-    // 2. 【关键修复】清除背景图片
-    // 如果不加这一行，之前设置的背景图会一直挡在颜色上面
+    // 1. 清除背景图片
     canvas.value.backgroundImage = null
+
+    // 获取画布的实际宽高 (关键修正)
+    const w = canvas.value.width
+    const h = canvas.value.height
+
+    // 2. 判断类型
+    if (typeof value === 'string') {
+      // === A. 纯色 ===
+      canvas.value.backgroundColor = value
+    } else if (typeof value === 'object' && value.type === 'gradient') {
+      // === B. 渐变 ===
+      const { start, end, angle } = value
+
+      // 计算像素坐标 (使用 w 和 h，而不是 0 和 1)
+      let coords = { x1: 0, y1: 0, x2: 0, y2: h } // 默认垂直 (90度)
+
+      // 简单的角度映射
+      if (angle === 0 || angle === 360) {
+        // 左 -> 右
+        coords = { x1: 0, y1: 0, x2: w, y2: 0 }
+      } else if (angle === 90) {
+        // 上 -> 下
+        coords = { x1: 0, y1: 0, x2: 0, y2: h }
+      } else if (angle === 180) {
+        // 右 -> 左
+        coords = { x1: w, y1: 0, x2: 0, y2: 0 }
+      } else if (angle === 270) {
+        // 下 -> 上
+        coords = { x1: 0, y1: h, x2: 0, y2: 0 }
+      } else if (angle === 45) {
+        // 左上 -> 右下
+        coords = { x1: 0, y1: 0, x2: w, y2: h }
+      } else if (angle === 135) {
+        // 右上 -> 左下
+        coords = { x1: w, y1: 0, x2: 0, y2: h }
+      } else {
+        // 其他角度默认垂直，防止不显示
+        coords = { x1: 0, y1: 0, x2: 0, y2: h }
+      }
+
+      // 创建渐变对象
+      const gradient = new fabric.value.Gradient({
+        type: 'linear',
+        // 🔴 [移除] gradientUnits: 'percentage', 不要用这个
+        coords: coords, // 使用像素坐标
+        colorStops: [
+          { offset: 0, color: start },
+          { offset: 1, color: end }
+        ]
+      })
+
+      // 应用给背景
+      canvas.value.backgroundColor = gradient
+    }
 
     // 3. 刷新视图
     canvas.value.requestRenderAll()

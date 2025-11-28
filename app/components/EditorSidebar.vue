@@ -46,6 +46,57 @@
     return currentMenu ? currentMenu.title : '属性设置'
   })
 
+  // 🟢 [新增] 背景面板的状态
+  const bgMode = ref<'solid' | 'gradient'>('solid') // 背景模式：纯色/渐变
+
+  // 自定义纯色
+  const customColor = ref('#ffffff')
+
+  // 自定义渐变
+  const gradientState = ref({
+    color1: '#ffffff', // 起始色
+    color2: '#4f46e5', // 结束色
+    angle: 90 // 角度
+  })
+
+  // 预设渐变列表
+  const presetGradients = [
+    { label: '落日', c1: '#fa709a', c2: '#fee140', angle: 0 },
+    { label: '海洋', c1: '#4facfe', c2: '#00f2fe', angle: 0 },
+    { label: '极光', c1: '#a18cd1', c2: '#fbc2eb', angle: 0 },
+    { label: '森林', c1: '#84fab0', c2: '#8fd3f4', angle: 0 },
+    { label: '暗夜', c1: '#434343', c2: '#000000', angle: 0 },
+    { label: '钛白', c1: '#e0c3fc', c2: '#8ec5fc', angle: 0 }
+  ]
+
+  // 监听自定义颜色变化，实时应用
+  const applyCustomColor = () => {
+    emit('set-bg-color', customColor.value)
+  }
+
+  // 🟢 [核心] 生成并应用渐变
+  const applyGradient = (preset?: any) => {
+    // 如果传入了预设，先更新状态
+    if (preset) {
+      gradientState.value.color1 = preset.c1
+      gradientState.value.color2 = preset.c2
+      gradientState.value.angle = preset.angle || 90
+    }
+
+    // 发送渐变配置对象给父组件
+    // 我们不在这里生成 fabric.Gradient，而是把参数传过去，让父组件处理
+    emit('set-bg-color', {
+      type: 'gradient',
+      start: gradientState.value.color1,
+      end: gradientState.value.color2,
+      angle: gradientState.value.angle
+    })
+  }
+
+  const handlePresetColor = (color: string) => {
+    emit('set-bg-color', color)
+    customColor.value = color
+  }
   // --- 拖拽排序逻辑 ---
   const dragOverId = ref<string | null>(null)
   const dragPosition = ref<'top' | 'bottom' | null>(null) // 指示线位置
@@ -240,34 +291,142 @@
         </div>
 
         <!-- === 2. 背景模版 (已恢复原样) === -->
+        <!-- === 2. 背景设置 (升级版) === -->
         <div v-if="activeTab === 'templates'" class="space-y-6">
-          <!-- 复杂模版 -->
-          <div>
-            <h3 class="text-xs font-bold text-gray-400 mb-2 uppercase">推荐模版</h3>
+          <!-- 顶部切换：纯色 / 渐变 -->
+          <div class="flex p-1 bg-gray-100 rounded-lg">
+            <button
+              @click="bgMode = 'solid'"
+              class="flex-1 py-1.5 text-xs font-medium rounded-md transition"
+              :class="bgMode === 'solid' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-gray-700'">
+              纯色填充
+            </button>
+            <button
+              @click="bgMode = 'gradient'"
+              class="flex-1 py-1.5 text-xs font-medium rounded-md transition"
+              :class="
+                bgMode === 'gradient' ? 'bg-white shadow-sm text-indigo-600' : 'text-gray-500 hover:text-gray-700'
+              ">
+              渐变填充
+            </button>
+          </div>
+
+          <!-- 🎨 模式 A: 纯色 -->
+          <div v-if="bgMode === 'solid'" class="space-y-4">
+            <!-- 自定义选色器 -->
+            <div>
+              <h3 class="text-xs font-bold text-gray-400 mb-2 uppercase">自定义颜色</h3>
+              <div class="flex items-center gap-3">
+                <div class="relative w-10 h-10 rounded-full border shadow-sm overflow-hidden group cursor-pointer">
+                  <!-- 原生取色器 (透明覆盖) -->
+                  <input
+                    type="color"
+                    v-model="customColor"
+                    @input="applyCustomColor"
+                    class="absolute inset-[-50%] w-[200%] h-[200%] cursor-pointer p-0 border-0" />
+                  <!-- 显示当前颜色的环 -->
+                  <div class="absolute inset-0 pointer-events-none border-2 border-white/20 rounded-full"></div>
+                </div>
+                <div class="flex-1">
+                  <input
+                    type="text"
+                    v-model="customColor"
+                    @change="applyCustomColor"
+                    class="w-full text-xs border border-gray-200 rounded px-2 py-1.5 focus:ring-2 focus:ring-indigo-500 outline-none" />
+                </div>
+              </div>
+            </div>
+
+            <!-- 预设颜色 -->
+            <div>
+              <h3 class="text-xs font-bold text-gray-400 mb-2 uppercase">推荐颜色</h3>
+              <div class="grid grid-cols-5 gap-2">
+                <!-- 透明背景选项 -->
+                <div
+                  @click="emit('set-bg-color', 'transparent')"
+                  title="透明背景"
+                  class="w-full aspect-square rounded-full cursor-pointer border border-gray-200 hover:scale-110 transition flex items-center justify-center bg-gray-50 overflow-hidden">
+                  <span class="text-[10px] text-gray-400">🚫</span>
+                </div>
+                <!-- 颜色列表 -->
+                <div
+                  v-for="color in assets.colors"
+                  :key="color"
+                  @click="handlePresetColor(color)"
+                  class="w-full aspect-square rounded-full cursor-pointer border border-gray-100 hover:scale-110 transition shadow-sm"
+                  :style="{ backgroundColor: color }"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 🌈 模式 B: 渐变 -->
+          <div v-if="bgMode === 'gradient'" class="space-y-5">
+            <!-- 渐变生成器 -->
+            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-3">
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-gray-500">起始色</span>
+                <input
+                  type="color"
+                  v-model="gradientState.color1"
+                  @input="applyGradient()"
+                  class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" />
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-gray-500">结束色</span>
+                <input
+                  type="color"
+                  v-model="gradientState.color2"
+                  @input="applyGradient()"
+                  class="w-6 h-6 p-0 border-0 bg-transparent cursor-pointer" />
+              </div>
+
+              <!-- 角度滑块 -->
+              <div class="pt-2">
+                <div class="flex justify-between text-[10px] text-gray-400 mb-1">
+                  <span>角度: {{ gradientState.angle }}°</span>
+                </div>
+                <input
+                  type="range"
+                  v-model.number="gradientState.angle"
+                  min="0"
+                  max="360"
+                  step="45"
+                  @input="applyGradient()"
+                  class="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-indigo-600" />
+              </div>
+            </div>
+
+            <!-- 预设渐变 -->
+            <div>
+              <h3 class="text-xs font-bold text-gray-400 mb-2 uppercase">推荐渐变</h3>
+              <div class="grid grid-cols-2 gap-3">
+                <div
+                  v-for="(grad, idx) in presetGradients"
+                  :key="idx"
+                  @click="applyGradient(grad)"
+                  class="h-10 rounded-md cursor-pointer border border-transparent hover:border-indigo-300 transition shadow-sm relative group"
+                  :style="{ background: `linear-gradient(to right, ${grad.c1}, ${grad.c2})` }">
+                  <span
+                    class="absolute inset-0 flex items-center justify-center text-[10px] text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity drop-shadow-md">
+                    {{ grad.label }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 模版列表 (保留) -->
+          <div class="pt-4 border-t border-gray-100">
+            <h3 class="text-xs font-bold text-gray-400 mb-2 uppercase">复杂背景模版</h3>
+            <!-- ... 这里放原来的 assets.templates 循环 ... -->
             <div class="grid grid-cols-2 gap-3">
               <div
                 v-for="tpl in assets.templates"
                 :key="tpl.id"
                 @click="emit('apply-template', tpl)"
-                class="aspect-[2/3] rounded-lg cursor-pointer border hover:shadow-md transition overflow-hidden relative group">
-                <!-- 恢复了背景预览 -->
+                class="aspect-[2/3] rounded-lg cursor-pointer border hover:shadow-md transition overflow-hidden relative">
                 <div class="w-full h-full" :style="{ background: tpl.preview }"></div>
-                <div class="absolute bottom-0 inset-x-0 bg-white/90 p-2 text-xs text-center font-medium">
-                  {{ tpl.label }}
-                </div>
               </div>
-            </div>
-          </div>
-          <!-- 纯色背景 -->
-          <div>
-            <h3 class="text-xs font-bold text-gray-400 mb-2 uppercase">纯色背景</h3>
-            <div class="grid grid-cols-4 gap-2">
-              <div
-                v-for="color in assets.colors"
-                :key="color"
-                @click="emit('set-bg-color', color)"
-                class="w-full aspect-square rounded-full cursor-pointer border hover:scale-110 transition"
-                :style="{ backgroundColor: color }"></div>
             </div>
           </div>
         </div>
@@ -295,6 +454,13 @@
                   ? 'clip-star'
                   : 'rounded-sm'
               "></div>
+            <svg
+              v-else-if="item.type === 'path'"
+              viewBox="0 0 1024 1024"
+              class="w-10 h-10 transition-transform group-hover:scale-110"
+              :style="{ fill: item.fill || item.color || '#000' }">
+              <path :d="item.path" />
+            </svg>
             <img v-else :src="item.url" class="w-12 h-12 object-contain transition-transform group-hover:scale-110" />
           </div>
         </div>
