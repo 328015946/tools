@@ -20,7 +20,8 @@
     'update-shadow-prop',
     'update-clip',
     'distribute', // [新增]
-    'remove-bg' // [新增]
+    'remove-bg', // [新增]
+    'update-text-texture'
   ])
 
   // --- 2. 响应式同步机制 ---
@@ -116,18 +117,59 @@
     return 'none'
   })
 
-  // --- 4. 辅助 Helper ---
-  const normalizeColor = (color: string | undefined | null) => {
+  // ... 其他 computed ...
+
+  // 🟢 [新增] 判断当前文字是否使用了 Pattern 填充
+  const hasTexture = computed(() => {
     uiTick.value
+    const fill = props.activeObject?.fill
+    // 如果 fill 是对象且有 source 属性，说明是 Pattern
+    return typeof fill === 'object' && fill !== null && fill.source
+  })
+
+  // 🟢 [新增] 处理纹理上传
+  const textureInput = ref<HTMLInputElement | null>(null)
+
+  const triggerTextureUpload = () => {
+    textureInput.value?.click()
+  }
+
+  const handleTexturePick = (e: Event) => {
+    const file = (e.target as HTMLInputElement).files?.[0]
+    if (!file) return
+
+    // 发送给 index.vue 处理
+    emit('update-text-texture', file)
+
+    // 清空 input，防止重复选同一张图不触发 change
+    if (textureInput.value) textureInput.value.value = ''
+  }
+
+  // 🟢 [修复版] 增加类型检查，防止 Pattern/Gradient 对象导致报错
+  const normalizeColor = (color: string | any) => {
+    uiTick.value
+
+    // 1. 如果颜色是对象（说明是图片纹理 Pattern 或渐变 Gradient），无法在颜色选择器显示
+    // 直接返回黑色，防止报错
+    if (typeof color === 'object') {
+      return '#000000'
+    }
+
+    // 2. 常规字符串处理
     if (!color || color === 'transparent') return '#ffffff'
-    if (color.startsWith('#')) return color.slice(0, 7)
-    if (color.startsWith('rgb')) {
-      const rgb = color.match(/\d+/g)
-      if (rgb && rgb.length >= 3) {
-        const hex = (n: string) => parseInt(n).toString(16).padStart(2, '0')
-        return `#${hex(rgb[0])}${hex(rgb[1])}${hex(rgb[2])}`
+
+    // 确保 color 是字符串再调用 startsWith
+    if (typeof color === 'string') {
+      if (color.startsWith('#')) return color.slice(0, 7)
+      if (color.startsWith('rgb')) {
+        const rgb = color.match(/\d+/g)
+        if (rgb && rgb.length >= 3) {
+          const hex = (n: string) => parseInt(n).toString(16).padStart(2, '0')
+          return `#${hex(rgb[0])}${hex(rgb[1])}${hex(rgb[2])}`
+        }
       }
     }
+
     return '#000000'
   }
 
@@ -338,6 +380,28 @@
                 @input="(e:any)=>update('fill', e.target.value)"
                 class="color-picker" />
             </div>
+          </div>
+          <!-- 🟢 [新增] 文字纹理填充 -->
+          <div class="flex flex-col gap-2 mt-2 p-2 bg-gray-50 rounded border border-gray-200">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-medium text-gray-600">图片纹理填充</span>
+              <!-- 如果已有纹理，显示清除按钮 -->
+              <button
+                v-if="hasTexture"
+                @click="$emit('update-text-texture', null)"
+                class="text-[10px] text-red-500 hover:underline">
+                清除纹理
+              </button>
+            </div>
+
+            <button
+              @click="triggerTextureUpload"
+              class="w-full py-1.5 border border-dashed border-gray-300 rounded text-xs text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition flex items-center justify-center gap-2 bg-white">
+              <span v-if="!hasTexture">🖼️ 上传图片作为文字底纹</span>
+              <span v-else>🔄 更换图片</span>
+            </button>
+            <!-- 隐藏的文件上传 input -->
+            <input type="file" ref="textureInput" accept="image/*" class="hidden" @change="handleTexturePick" />
           </div>
 
           <div class="flex-row-center">

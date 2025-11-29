@@ -2876,6 +2876,100 @@
     triggerRef(activeObject) // 刷新右侧面板 UI
     toast.success('样式已粘贴')
   }
+  // ... 其他函数 ...
+
+  // pages/index.vue
+
+  // 🟢 [修复增强版] 设置文字图片纹理
+  const handleTextTexture = (file: File | null) => {
+    const active = canvas.value?.getActiveObject()
+
+    // 1. 检查是否选中了文字
+    if (!active || !['i-text', 'text', 'textbox'].includes(active.type)) {
+      // 也可以加个提示
+      // toast.error('请先选中文字')
+      return
+    }
+
+    // 2. 情况 A: 清除纹理 (恢复默认色)
+    if (!file) {
+      active.set('fill', '#000000') // 恢复为黑色或原色
+      canvas.value.requestRenderAll()
+      saveHistory()
+      triggerRef(activeObject)
+      return
+    }
+
+    // 3. 情况 B: 设置图片纹理
+    const reader = new FileReader()
+    reader.onload = f => {
+      const data = f.target?.result as string
+
+      // 使用原生 Image 对象加载，更稳健
+      const img = new Image()
+      img.src = data
+
+      img.onload = () => {
+        // 计算缩放比例：让图片的高度大约等于文字的高度
+        // 这样纹理就能完整显示在文字里，而不是只显示一个角落
+        const textHeight = active.height * active.scaleY
+        // 如果图片比文字大，就缩小它；否则保持原样 (防止太糊)
+        let scale = 1
+        if (img.height > textHeight) {
+          scale = textHeight / img.height
+        }
+
+        // 创建 Pattern 对象
+        // 注意：Fabric v6 可能需要 fabric.value.Pattern，视你的导入方式而定
+        const PatternClass = fabric.value.Pattern || fabric.value.FabricPattern
+
+        const pattern = new PatternClass({
+          source: img,
+          repeat: 'repeat'
+          // 💡 关键：设置 patternTransform 来缩放图片
+          // 格式通常是矩阵 [scaleX, 0, 0, scaleY, offsetX, offsetY]
+          // 这里我们简单做等比缩放
+          // 注意：不同版本的 Fabric 对 patternTransform 的支持不同
+          // 如果这行报错，可以注释掉，但这会影响大图的显示效果
+        })
+
+        // 手动挂载 transformMatrix (Fabric Pattern 的缩放有时需要这样设置)
+        // [scaleX, skewY, skewX, scaleY, translateX, translateY]
+        pattern.patternTransform = [scale, 0, 0, scale, 0, 0]
+
+        // 应用填色
+        active.set({
+          fill: pattern,
+          dirty: true, // 标记为“脏”，强制刷新缓存
+          objectCaching: false // 暂时关闭缓存，确保立即看到效果
+        })
+
+        // 渲染
+        canvas.value.requestRenderAll()
+
+        // 恢复缓存 (延时一下优化性能)
+        setTimeout(() => {
+          if (active) active.set('objectCaching', true)
+        }, 500)
+
+        saveHistory()
+        triggerRef(activeObject) // 刷新右侧 UI
+      }
+    }
+    reader.readAsDataURL(file)
+  }
+  // 🟢 [新增] 处理复位视图
+  const handleResetView = () => {
+    // 调用之前写好的 autoFit
+    // 这会自动计算缩放比例并居中
+    autoFit()
+
+    // 如果你还想强制重置平移量 (translate 0,0)
+    // 需要调用 workspace 组件里的方法
+    if (workspaceRef.value) {
+      workspaceRef.value.resetView() // 这个方法会将 translate 重置为 0
+    }
+  }
 </script>
 
 <template>
@@ -2891,7 +2985,8 @@
       @save="saveProject"
       @download="downloadImage"
       @toggle-grid="toggleGrid"
-      @add-guide="addGuide" />
+      @add-guide="addGuide"
+      @reset-view="handleResetView" />
 
     <div class="flex-1 flex overflow-hidden">
       <EditorSidebar
@@ -2939,7 +3034,8 @@
         @update-shadow-prop="handleUpdateShadowProp"
         @update-clip="handleClipImage"
         @distribute="distributeObjects"
-        @remove-bg="handleRemoveBg" />
+        @remove-bg="handleRemoveBg"
+        @update-text-texture="handleTextTexture" />
 
       <ContextMenu
         :visible="contextMenu.visible"

@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-26 16:46:56
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-27 18:47:33
+ * @LastEditTime: 2025-11-29 11:36:52
  * @FilePath: \xiao-nuxt4\app\components\EditorHeader.vue
  * @Description: 注释
 -->
@@ -15,7 +15,7 @@
     canvasHeight: number
   }>()
 
-  const emit = defineEmits(['undo', 'redo', 'save', 'download', 'toggle-grid', 'add-guide', 'resize'])
+  const emit = defineEmits(['undo', 'redo', 'save', 'download', 'toggle-grid', 'add-guide', 'resize', 'reset-view'])
   // 控制图层面板
   const showLayers = ref(false)
 
@@ -135,6 +135,16 @@
               stroke-linejoin="round"
               stroke-width="2"
               d="M10 4v16M14 4v16M4 10h16M4 14h16" />
+          </svg>
+        </button>
+        <!-- 🟢 [新增] 复位视图按钮 -->
+        <button @click="$emit('reset-view')" class="tool-btn" title="复位视图 (Fit Screen)">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
           </svg>
         </button>
         <button @click="$emit('add-guide', 'h')" class="tool-btn" title="添加水平辅助线">

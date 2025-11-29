@@ -2,7 +2,7 @@
  * @Author: zengxiaobin
  * @Date: 2025-11-26 16:47:10
  * @LastEditors: xiaobin
- * @LastEditTime: 2025-11-29 10:49:44
+ * @LastEditTime: 2025-11-29 11:39:03
  * @FilePath: \xiao-nuxt4\app\components\EditorWorkspace.vue
  * @Description: 注释
 -->
@@ -173,7 +173,7 @@
     translateX.value = 0
     translateY.value = 0
   }
-  defineExpose({ panToCenter })
+  defineExpose({ panToCenter, resetView })
 </script>
 
 <template>
