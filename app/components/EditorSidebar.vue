@@ -7,6 +7,7 @@
     assets: any
     layers?: any[] // 可选，防止旧代码报错
     activeObject?: any
+    isPenMode?: boolean // 新增
   }>()
 
   const emit = defineEmits([
@@ -22,7 +23,8 @@
     'toggle-layer-visible',
     'toggle-layer-lock',
     'reorder-layer', // [新增] 排序事件
-    'toggle-group-expand' // [新增] 折叠事件
+    'toggle-group-expand', // [新增] 折叠事件
+    'toggle-pen-mode' // 新增事件
   ])
   // 1. 定义菜单配置 (集中管理 Icon、名称、侧边栏标题)
   const menus = [
@@ -332,7 +334,30 @@
                 :class="isDrawing ? 'left-6' : 'left-1'"></div>
             </div>
           </div>
+          <div class="border-t border-gray-100 pt-4">
+            <h3 class="text-xs font-bold text-gray-400 mb-2 uppercase">矢量绘图</h3>
 
+            <!-- 🟢 [新增] 钢笔/多边形工具按钮 -->
+            <button
+              @click="$emit('toggle-pen-mode')"
+              class="w-full py-3 rounded-lg border flex items-center justify-center gap-3 transition select-none group active:scale-95"
+              :class="
+                isPenMode
+                  ? 'bg-indigo-600 text-white border-indigo-600'
+                  : 'bg-white border-gray-200 text-gray-600 hover:border-indigo-300'
+              ">
+              <span class="text-lg">✒️</span>
+              <span class="text-sm font-medium">钢笔 / 多边形工具</span>
+            </button>
+
+            <p class="text-[10px] text-gray-400 mt-2 leading-relaxed">
+              操作指南：<br />
+              1. 点击画布确定顶点<br />
+              2. 移动鼠标预览线条<br />
+              3. <span class="font-bold text-gray-600">双击鼠标</span> 或按
+              <span class="font-bold text-gray-600">Enter</span> 完成绘制
+            </p>
+          </div>
           <!-- 颜色 -->
           <div class="space-y-2">
             <label class="text-xs font-bold text-gray-400 uppercase">笔触颜色</label>

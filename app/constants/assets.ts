@@ -10,12 +10,12 @@ export const EDITOR_ASSETS = {
       data: {
         background: '#FFF1F2',
         objects: [
-          { type: 'circle', fill: '#FDA4AF', radius: 100, left: 300, top: 300, opacity: 0.5 },
+          { type: 'circle', fill: '#FDA4AF', radius: 100, left: 400, top: 300, opacity: 0.5 },
           {
             type: 'text',
             content: '年中\n大促',
             fontSize: 80,
-            left: 300,
+            left: 400,
             top: 250,
             fill: '#BE123C',
             textAlign: 'center',
@@ -32,12 +32,12 @@ export const EDITOR_ASSETS = {
       data: {
         background: '#EFF6FF',
         objects: [
-          { type: 'rect', fill: '#3B82F6', width: 600, height: 150, left: 300, top: 75 },
+          { type: 'rect', fill: '#3B82F6', width: 600, height: 150, left: 400, top: 75 },
           {
             type: 'text',
             content: 'WE ARE HIRING',
             fontSize: 50,
-            left: 300,
+            left: 400,
             top: 75,
             fill: '#FFFFFF',
             fontWeight: 'bold'
@@ -46,13 +46,13 @@ export const EDITOR_ASSETS = {
             type: 'text',
             content: '诚聘精英',
             fontSize: 60,
-            left: 300,
+            left: 400,
             top: 300,
             fill: '#1E40AF',
             textAlign: 'center'
           },
-          { type: 'rect', fill: '#1E3A8A', width: 200, height: 50, left: 300, top: 500, rx: 10, ry: 10 },
-          { type: 'text', content: '加入我们', fontSize: 24, left: 300, top: 500, fill: '#FFFFFF' }
+          { type: 'rect', fill: '#1E3A8A', width: 200, height: 50, left: 400, top: 500, rx: 10, ry: 10 },
+          { type: 'text', content: '加入我们', fontSize: 24, left: 400, top: 500, fill: '#FFFFFF' }
         ]
       }
     },
@@ -68,7 +68,7 @@ export const EDITOR_ASSETS = {
             fill: '#38BDF8',
             width: 400,
             height: 400,
-            left: 300,
+            left: 400,
             top: 300,
             opacity: 0.2,
             rx: 200,
@@ -78,13 +78,13 @@ export const EDITOR_ASSETS = {
             type: 'text',
             content: 'FUTURE',
             fontSize: 100,
-            left: 300,
+            left: 400,
             top: 250,
             fill: '#FFFFFF',
             fontWeight: 'bold',
             fontFamily: 'Arial'
           },
-          { type: 'text', content: '2025 发布会', fontSize: 40, left: 300, top: 380, fill: '#94A3B8' }
+          { type: 'text', content: '2025 发布会', fontSize: 40, left: 400, top: 380, fill: '#94A3B8' }
         ]
       }
     },
@@ -100,7 +100,7 @@ export const EDITOR_ASSETS = {
             type: 'text',
             content: '保持热爱\n奔赴山海',
             fontSize: 50,
-            left: 300,
+            left: 400,
             top: 350,
             fill: '#F3F4F6',
             textAlign: 'center',
