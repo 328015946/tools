@@ -2255,6 +2255,79 @@
       })
       canvas.value.add(text)
       canvas.value.setActiveObject(text)
+    } else if (item.type === 'svg') {
+      // 🟢 [修复版] 适配 Fabric v6 (严禁传入 callback)
+      console.log('正在下载 SVG:', item.url)
+
+      fetch(item.url)
+        .then(res => {
+          if (!res.ok) throw new Error('网络请求失败')
+          return res.text()
+        })
+        .then(svgStr => {
+          console.log('SVG 下载成功，开始解析...')
+
+          // 定义添加到画布的逻辑
+          const addToCanvas = (objects: any, options: any) => {
+            if (!objects || !objects.length) return
+
+            // 过滤掉可能的 null/undefined 元素，防止 Group 报错
+            const validObjects = objects.filter((o: any) => o !== null && o !== undefined)
+
+            if (validObjects.length === 0) return
+
+            let svgGroup
+            if (fabric.value.util.groupSVGElements) {
+              // v5 兼容
+              svgGroup = fabric.value.util.groupSVGElements(validObjects, options)
+            } else {
+              // v6 写法
+              svgGroup = new fabric.value.Group(validObjects, { ...options })
+            }
+
+            svgGroup.set({
+              left: left,
+              top: top,
+              originX: 'center',
+              originY: 'center',
+              fill: '#000000' // 强制给个颜色
+            })
+
+            svgGroup.scaleToWidth(100)
+
+            canvas.value.add(svgGroup)
+            canvas.value.setActiveObject(svgGroup)
+            canvas.value.requestRenderAll()
+            saveHistory()
+            console.log('SVG 添加成功')
+          }
+
+          // 🌟 核心修复点：这里不要传 callback，只传字符串！
+          const result = fabric.value.loadSVGFromString(svgStr)
+
+          // 1. 如果是 v6 (返回 Promise)
+          if (result && typeof result.then === 'function') {
+            result
+              .then((res: any) => {
+                // v6 解析结果包含 { objects, options }
+                // 有些版本直接返回 objects 数组，做个兼容
+                const objects = Array.isArray(res) ? res : res.objects
+                const options = res.options || {}
+                addToCanvas(objects, options)
+              })
+              .catch((e: any) => console.error('SVG解析错:', e))
+          }
+          // 2. 如果是 v5 (返回 undefined，需要重新用回调方式调用)
+          else {
+            // 只有检测到不支持 Promise 时，才重新传回调
+            fabric.value.loadSVGFromString(svgStr, (objects: any, options: any) => {
+              addToCanvas(objects, options)
+            })
+          }
+        })
+        .catch(err => {
+          console.error('图标加载失败:', err)
+        })
     } else if (item.type === 'shape') {
       let shape
       const opts = { ...commonProps, fill: item.color, width: 100, height: 100 }
@@ -2416,6 +2489,17 @@
   const updateProp = ({ key, value }: { key: string; value: any }) => {
     const active = canvas.value?.getActiveObject()
     if (active) {
+      // 🟢 [新增] 特殊处理：如果是 Group (例如 SVG 图标) 且在修改颜色
+      // 我们需要遍历它的所有子元素，把颜色应用下去
+      if (active.type === 'group' || active.type === 'path-group') {
+        if (key === 'fill' || key === 'stroke') {
+          // 简单粗暴：把组里所有路径都改色
+          active.getObjects().forEach((obj: any) => {
+            obj.set(key, value)
+          })
+        }
+      }
+
       active.set(key, value)
 
       if (key === 'fontSize' || key === 'scaleX' || key === 'scaleY') {

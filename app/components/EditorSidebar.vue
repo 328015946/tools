@@ -30,6 +30,7 @@
     { key: 'elements', icon: '🧩', label: '素材', title: '添加素材' },
     { key: 'components', icon: '📦', label: '组件', title: '图表组件' },
     { key: 'text', icon: 'T', label: '文字', title: '添加文字' },
+    { key: 'icons', icon: '⭐', label: '图标', title: '矢量图标库' }, // 🟢 [新增]
     { key: 'qrcode', icon: '📱', label: '二维码', title: '生成二维码' }, // 🟢 [新增]
     { key: 'draw', icon: '🖊️', label: '画笔', title: '自由绘制' },
     { key: 'upload', icon: '☁️', label: '上传', title: '本地上传' }
@@ -38,7 +39,9 @@
   // 类型定义自动推导，或者手动指定
   type TabType = 'templates' | 'elements' | 'components' | 'text' | 'draw' | 'upload' | 'layers'
 
-  const activeTab = ref<'templates' | 'elements' | 'components' | 'text' | 'upload' | 'draw' | 'layers'>('elements')
+  const activeTab = ref<'templates' | 'elements' | 'components' | 'icons' | 'text' | 'upload' | 'draw' | 'layers'>(
+    'elements'
+  )
   const fileInput = ref<HTMLInputElement | null>(null)
   // 2. [优化] 使用 computed 计算当前侧边栏标题
   // 不再需要在模板里写一堆 if-else
@@ -162,7 +165,45 @@
   const isDrawing = ref(false)
   const brushColor = ref('#000000')
   const brushWidth = ref(5)
+  // 🟢 [新增] 图标相关状态
+  const iconQuery = ref('') // 搜索关键词
+  const iconList = ref<any[]>([]) // 搜索结果
+  const isSearchingIcons = ref(false)
 
+  // 🟢 [新增] 搜索图标函数
+  const searchIcons = async () => {
+    if (!iconQuery.value) return
+
+    isSearchingIcons.value = true
+    try {
+      // 调用 Iconify 官方搜索接口 (limit=50 限制数量)
+      const res = await fetch(`https://api.iconify.design/search?query=${iconQuery.value}&limit=60`)
+      const data = await res.json()
+
+      // 处理数据：Iconify 返回的是 icon 名称 (如 "mdi:home")
+      // 我们需要拼接成 SVG 图片地址
+      if (data.icons) {
+        iconList.value = data.icons.map((name: string) => {
+          return {
+            type: 'svg', // 标记为 svg 类型
+            // Iconify SVG 直链格式: https://api.iconify.design/{prefix}/{name}.svg
+            url: `https://api.iconify.design/${name.replace(':', '/')}.svg`,
+            label: name
+          }
+        })
+      }
+    } catch (e) {
+      console.error('搜索失败', e)
+    } finally {
+      isSearchingIcons.value = false
+    }
+  }
+
+  // 🟢 [新增] 初始化加载一些热门图标 (可选)
+  const loadHotIcons = () => {
+    iconQuery.value = 'arrow' // 默认搜个箭头
+    searchIcons()
+  }
   // 监听画笔设置
   watch(isDrawing, val => emit('set-drawing-mode', val))
   watch(brushColor, val => emit('set-brush-color', val))
@@ -170,6 +211,9 @@
 
   // 监听 Tab 切换：进画笔Tab自动开，出Tab自动关
   watch(activeTab, newTab => {
+    if (newTab === 'icons' && iconList.value.length === 0) {
+      loadHotIcons()
+    }
     if (newTab === 'draw') {
       isDrawing.value = true
     } else {
@@ -225,6 +269,11 @@
     } catch (err) {
       console.error(err)
     }
+  }
+  // 🟢 [新增] 点击标签搜索图标
+  const handleTagClick = (tag: string) => {
+    iconQuery.value = tag
+    searchIcons()
   }
 </script>
 
@@ -514,6 +563,63 @@
             <span class="text-xs text-gray-500 font-medium">{{ comp.label }}</span>
           </div>
         </div>
+        <!-- ... 上面是 components ... -->
+
+        <!-- 🟢 [新增] 矢量图标面板 -->
+        <div v-if="activeTab === 'icons'" class="space-y-4 h-full flex flex-col">
+          <!-- 搜索框 -->
+          <div class="flex gap-2">
+            <input
+              v-model="iconQuery"
+              @keyup.enter="searchIcons"
+              type="text"
+              placeholder="搜索图标 (如: phone, wechat)..."
+              class="flex-1 text-xs border border-gray-200 rounded px-2 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-gray-50" />
+            <button
+              @click="searchIcons"
+              class="px-3 py-1 bg-indigo-600 text-white rounded text-xs hover:bg-indigo-700 transition">
+              🔍
+            </button>
+          </div>
+
+          <!-- 推荐标签 (可选) -->
+          <div class="flex flex-wrap gap-1">
+            <span
+              v-for="tag in ['arrow', 'home', 'user', 'star', 'check', 'close']"
+              :key="tag"
+              @click="handleTagClick(tag)"
+              class="px-2 py-1 bg-gray-100 text-[10px] text-gray-500 rounded-full cursor-pointer hover:bg-gray-200">
+              {{ tag }}
+            </span>
+          </div>
+
+          <!-- 列表区域 -->
+          <div class="flex-1 overflow-y-auto custom-scrollbar -mx-2 px-2">
+            <div v-if="isSearchingIcons" class="text-center py-10 text-gray-400 text-xs">加载中...</div>
+
+            <div v-else-if="iconList.length === 0" class="text-center py-10 text-gray-400 text-xs">
+              输入关键词搜索图标
+            </div>
+
+            <div v-else class="grid grid-cols-4 gap-2">
+              <div
+                v-for="(item, idx) in iconList"
+                :key="idx"
+                draggable="true"
+                @dragstart="e => handleDragStart(e, item)"
+                @click="emit('add-element', item)"
+                class="aspect-square bg-gray-50 hover:bg-indigo-50 rounded p-1 cursor-pointer border border-transparent hover:border-indigo-200 transition flex items-center justify-center group"
+                :title="item.label">
+                <!-- 直接用 img 标签预览 SVG -->
+                <img
+                  :src="item.url"
+                  class="w-6 h-6 opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-transform" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ... 下面是 text ... -->
         <!-- === 4. 文字 (已恢复原样) === -->
         <div v-if="activeTab === 'text'" class="space-y-3">
           <div
