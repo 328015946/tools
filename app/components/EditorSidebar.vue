@@ -1,6 +1,7 @@
 <script setup lang="ts">
   import { ref, watch } from 'vue'
   import LayerItem from './LayerItem.vue' // [新增] 引入组件
+  import QRCode from 'qrcode' // [新增] 引入库
   // [新增] 接收 layers 和 activeObject
   const props = defineProps<{
     assets: any
@@ -29,6 +30,7 @@
     { key: 'elements', icon: '🧩', label: '素材', title: '添加素材' },
     { key: 'components', icon: '📦', label: '组件', title: '图表组件' },
     { key: 'text', icon: 'T', label: '文字', title: '添加文字' },
+    { key: 'qrcode', icon: '📱', label: '二维码', title: '生成二维码' }, // 🟢 [新增]
     { key: 'draw', icon: '🖊️', label: '画笔', title: '自由绘制' },
     { key: 'upload', icon: '☁️', label: '上传', title: '本地上传' }
   ]
@@ -190,6 +192,38 @@
     if (input.files?.[0]) {
       emit('upload-image', input.files[0])
       input.value = ''
+    }
+  }
+
+  // 2. [新增] 二维码相关逻辑
+  const qrText = ref('https://www.google.com') // 默认内容
+  const qrColor = ref('#000000') // 前景色
+  const qrBgColor = ref('#ffffff') // 背景色 (透明可以用 null 或 rgba)
+
+  // 生成并添加到画布
+  const addQRCode = async () => {
+    if (!qrText.value) return
+
+    try {
+      // 生成高分辨率的 Base64 图片
+      const dataUrl = await QRCode.toDataURL(qrText.value, {
+        width: 400, // 足够清晰的宽度
+        margin: 1,
+        color: {
+          dark: qrColor.value,
+          light: qrBgColor.value // 如果想要透明背景，这里可以设为 null，但有些扫码器识别率会下降
+        }
+      })
+
+      // 复用现有的 add-element 事件，当作普通图片处理
+      emit('add-element', {
+        type: 'image',
+        url: dataUrl,
+        // 可以传一些初始参数，比如不需要太大
+        width: 200
+      })
+    } catch (err) {
+      console.error(err)
     }
   }
 </script>
@@ -494,7 +528,54 @@
             }}</span>
           </div>
         </div>
+        <!-- === 🟢 [新增] 二维码面板 === -->
+        <div v-if="activeTab === 'qrcode'" class="space-y-6 animate-fade-in">
+          <!-- 输入框 -->
+          <div class="space-y-2">
+            <label class="text-xs font-bold text-gray-400 uppercase">链接 / 文本</label>
+            <textarea
+              v-model="qrText"
+              rows="4"
+              placeholder="输入网址或文本..."
+              class="w-full border border-gray-200 rounded-lg p-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none bg-gray-50"></textarea>
+          </div>
 
+          <!-- 颜色设置 -->
+          <div class="grid grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-gray-400 uppercase">前景色</label>
+              <div class="flex items-center gap-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
+                <input
+                  type="color"
+                  v-model="qrColor"
+                  class="w-6 h-6 border-none bg-transparent cursor-pointer p-0 rounded overflow-hidden" />
+                <span class="text-xs text-gray-500 font-mono">{{ qrColor }}</span>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-gray-400 uppercase">背景色</label>
+              <div class="flex items-center gap-2 border border-gray-200 rounded-lg p-2 bg-gray-50">
+                <input
+                  type="color"
+                  v-model="qrBgColor"
+                  class="w-6 h-6 border-none bg-transparent cursor-pointer p-0 rounded overflow-hidden" />
+                <span class="text-xs text-gray-500 font-mono">{{ qrBgColor }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 生成按钮 -->
+          <button
+            @click="addQRCode"
+            class="w-full py-3 bg-indigo-600 text-white rounded-lg font-bold shadow-md hover:bg-indigo-700 transition active:scale-95 flex items-center justify-center gap-2">
+            <span class="text-lg">✨</span> 生成到画布
+          </button>
+
+          <!-- 小提示 -->
+          <div class="bg-blue-50 text-blue-600 p-3 rounded-lg text-xs leading-relaxed border border-blue-100">
+            💡 提示：生成后，您可以像编辑普通图片一样调整它的大小、圆角或添加阴影。
+          </div>
+        </div>
         <!-- === 5. 上传 === -->
         <div
           v-if="activeTab === 'upload'"

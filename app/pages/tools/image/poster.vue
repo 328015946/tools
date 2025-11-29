@@ -5,11 +5,14 @@
   import EditorWorkspace from '~/components/EditorWorkspace.vue'
   import EditorSettings from '~/components/EditorSettings.vue'
   import ContextMenu from '~/components/ContextMenu.vue'
+  import ExportDialog from '~/components/ExportDialog.vue'
   import { toast } from 'vue-sonner' // [新增] 引入
+  import { removeBackground } from '@imgly/background-removal' // [新增]
   import { EDITOR_ASSETS } from '~/constants/assets'
   // --- 数据 (Assets) ---
   const assets = EDITOR_ASSETS
-
+  // [新增] 抠图 loading 状态
+  const isRemovingBg = ref(false)
   // --- 状态 ---
   const canvas = shallowRef<any>(null)
   const fabric = shallowRef<any>(null)
@@ -480,61 +483,77 @@
     saveHistory() // 保存历史
   }
 
-  // --- [新增] 图片滤镜处理 ---
-  // --- [修正后] 图片滤镜处理 ---
-  const handleImageFilter = (filterType: string) => {
+  // index.vue
+
+  // --- [升级版] 图片滤镜处理 ---
+  const handleImageFilter = (payload: any) => {
     if (!canvas.value) return
     const active = canvas.value.getActiveObject()
-    // 检查是否选中了对象，且对象类型是 image
     if (!active || active.type !== 'image') return
 
-    // 1. 获取滤镜的基础命名空间 (适配 Fabric v6)
-    // v6 中滤镜通常在 fabric.filters 下，而不是 fabric.Image.filters
+    // 兼容 Fabric v5/v6 写法
     const ns = fabric.value.filters || fabric.value.Image?.filters
 
-    if (!ns) {
-      console.error('无法找到滤镜模块，请检查 fabric 版本')
-      return
-    }
+    // 1. 如果是预设模式 (grayscale, sepia...)
+    if (payload.type !== 'parameter') {
+      // 简单粗暴：清空所有滤镜，应用新预设 (或者是叠加，看你需求)
+      // 这里演示“叠加模式”，只移除同类型的，防止互斥
 
-    // 2. 清除现有滤镜 (简化版：单选滤镜)
-    active.filters = []
+      // 如果是 'none'，清空所有
+      if (payload.type === 'none') {
+        active.filters = []
+      } else {
+        // 移除已存在的同名滤镜
+        const className = payload.type.charAt(0).toUpperCase() + payload.type.slice(1)
+        active.filters = active.filters.filter((f: any) => f.type !== className)
 
-    // 3. 根据类型添加滤镜
-    try {
-      switch (filterType) {
-        case 'grayscale':
-          active.filters.push(new ns.Grayscale())
-          break
-        case 'sepia':
-          active.filters.push(new ns.Sepia())
-          break
-        case 'invert':
-          active.filters.push(new ns.Invert())
-          break
-        case 'blur':
-          // 模糊滤镜需要传参
-          active.filters.push(new ns.Blur({ blur: 0.5 }))
-          break
-        case 'contrast':
-          // 对比度
-          active.filters.push(new ns.Contrast({ contrast: 0.2 }))
-          break
-        case 'none':
-        default:
-          // 这里的 none 就是清空，上面 active.filters = [] 已经做了
-          break
+        // 添加新滤镜
+        switch (payload.type) {
+          case 'grayscale':
+            active.filters.push(new ns.Grayscale())
+            break
+          case 'sepia':
+            active.filters.push(new ns.Sepia())
+            break
+          case 'invert':
+            active.filters.push(new ns.Invert())
+            break
+        }
       }
-
-      // 4. 应用滤镜 (这是必须的步骤)
-      active.applyFilters()
-
-      // 5. 重绘
-      canvas.value.requestRenderAll()
-      saveHistory()
-    } catch (e) {
-      console.error('应用滤镜失败:', e)
     }
+    // 2. 如果是参数调节模式 (Brightness, Contrast...)
+    else {
+      const { name, value } = payload
+
+      // 查找当前是否已有该滤镜
+      let filter = active.filters.find((f: any) => f.type === name)
+
+      if (!filter) {
+        // 如果没有，创建新的
+        if (name === 'Brightness') filter = new ns.Brightness({ brightness: value })
+        if (name === 'Contrast') filter = new ns.Contrast({ contrast: value })
+        if (name === 'Saturation') filter = new ns.Saturation({ saturation: value })
+        if (name === 'Blur') filter = new ns.Blur({ blur: value })
+
+        active.filters.push(filter)
+      } else {
+        // 如果有，更新属性
+        if (name === 'Brightness') filter.brightness = value
+        if (name === 'Contrast') filter.contrast = value
+        if (name === 'Saturation') filter.saturation = value
+        if (name === 'Blur') filter.blur = value
+      }
+    }
+
+    // 3. 应用并刷新
+    active.applyFilters()
+    canvas.value.requestRenderAll()
+
+    // 触发 Vue 更新 (让 Slider 回显正确)
+    triggerRef(activeObject)
+
+    // 节流保存历史 (可选，防止拖动滑块产生大量历史记录)
+    // saveHistory()
   }
   // --- [新增] 将图片设为背景 ---
   const handleSetBackground = () => {
@@ -1495,6 +1514,125 @@
     return null
   }
 
+  // index.vue
+
+  // --- [新增] 文字/元素阴影处理 ---
+
+  // 1. 设置整体阴影 (预设)
+  const handleSetShadow = (shadowConfig: any) => {
+    const active = canvas.value?.getActiveObject()
+    if (!active) return
+
+    if (!shadowConfig) {
+      // 移除阴影
+      active.set('shadow', null)
+    } else {
+      // 创建新阴影
+      active.set('shadow', new fabric.value.Shadow(shadowConfig))
+    }
+
+    canvas.value.requestRenderAll()
+    triggerRef(activeObject)
+    saveHistory()
+  }
+
+  // 2. 更新阴影的某个属性 (颜色/模糊/偏移)
+  const handleUpdateShadowProp = ({ key, value }: { key: string; value: any }) => {
+    const active = canvas.value?.getActiveObject()
+    // 必须确保 shadow 存在且是对象
+    if (!active || !active.shadow) return
+
+    // Fabric 的 active.shadow 也是一个对象实例，直接修改其属性即可
+    active.shadow[key] = value
+
+    // 强制刷新
+    active.dirty = true
+    canvas.value.requestRenderAll()
+    triggerRef(activeObject)
+    saveHistory()
+  }
+  // 替换上面的 handleTextCurve 函数
+
+  const handleTextCurve = (value: number) => {
+    const active = canvas.value?.getActiveObject()
+    if (!active || !['i-text', 'text', 'textbox'].includes(active.type)) return
+
+    // 1. 归零处理
+    if (Math.abs(value) < 2) {
+      active.set('path', null)
+      if (active.data) active.data.curveVal = 0
+      canvas.value.requestRenderAll()
+      saveHistory()
+      return
+    }
+
+    // 2. 存值
+    if (!active.data) active.data = {}
+    active.data.curveVal = value
+
+    // 3. 计算半径
+    // 假设文字宽度对应圆心角。value=100 对应 180度(PI)，value=50 对应 90度
+    const angle = (Math.PI * value) / 100 // 弧度
+    const width = active.getScaledWidth()
+    const radius = width / (2 * Math.sin(angle / 2))
+    const height = radius * (1 - Math.cos(angle / 2))
+
+    // 4. 生成 SVG Path
+    // M (start) A (radius radius 0 large sweep) (end)
+    // 我们需要让路径居中。假设路径起点在 (-width/2, ...)
+
+    // 为了简化，我们直接用 "M 0 0" 作为起点，然后让 Fabric 去适应
+    // value > 0: 向下凹 (笑脸) -> sweepFlag = 1
+    // value < 0: 向上凸 (哭脸) -> sweepFlag = 0
+    const sweepFlag = value > 0 ? 1 : 0
+
+    // 计算弦长 (Chord Length)
+    const chordLength = 2 * radius * Math.sin(angle / 2)
+
+    // 这里有一个技巧：如果只是简单弯曲，其实不需要非常精确的半径，
+    // 只要路径看起来是弯的就行。
+    // 让我们用一个更稳健的 Path 字符串：
+    // "M startX startY A r r 0 0 sweep endX endY"
+
+    // 动态生成的路径字符串
+    let pathData = ''
+
+    // 简单贝塞尔方案 (兼容性最好，不跳动)
+    // 如果 value 是正的，控制点在下方；负的在上方
+    const controlY = value * 2 // 弯曲程度因子
+    // 路径宽度略宽于文字，防止被切
+    const pathW = width
+
+    pathData = `M 0 0 Q ${pathW / 2} ${controlY} ${pathW} 0`
+
+    // 创建路径对象
+    const path = new fabric.value.Path(pathData, {
+      visible: false,
+      noScaleCache: true
+    })
+
+    // 5. 关键修复：位置对齐
+    // Fabric 把 path 应用到文字时，默认是 path 的左上角对齐文字左上角。
+    // 我们需要调整 path 的偏移，或者让 path 本身居中。
+
+    // 让路径相对于文字居中
+    // path.left = -width / 2
+    // path.top = -height / 2 (大概)
+
+    active.set({
+      path: path
+      // v6 中 pathSide/pathAlign 属性可能需要调整
+      // pathSide: 'center', // 如果支持
+      // pathAlign: 'center'
+    })
+
+    canvas.value.requestRenderAll()
+
+    // 注意：修改 path 后，saveHistory 可能会导致 JSON 序列化变大，这是正常的
+    // 节流保存
+    // saveHistory()
+  }
+
   // --- [修复版] 双击逻辑：复用 Proxy 模式 ---
   const handleDblClick = (opt: any) => {
     const target = toRaw(opt.target)
@@ -1650,6 +1788,92 @@
         newTarget.enterEditing()
         newTarget.selectAll()
       }
+    }
+  }
+
+  // index.vue -> script setup
+
+  const handleClipImage = (type: string) => {
+    if (!canvas.value) return
+    const active = canvas.value.getActiveObject()
+    if (!active || active.type !== 'image') return
+
+    // 1. 还原
+    if (type === 'none') {
+      active.set({ clipPath: null, dirty: true })
+      canvas.value.requestRenderAll()
+      saveHistory()
+      return
+    }
+
+    let clipObj: any = null
+    const width = active.width
+    const height = active.height
+    const size = Math.min(width, height) / 2
+
+    const common = {
+      originX: 'center',
+      originY: 'center',
+      left: 0,
+      top: 0,
+      absolutePositioned: false,
+      // 🟢 [关键] 给每个蒙版加个身份证，方便 UI 回显
+      data: { clipName: type }
+    }
+
+    if (type === 'circle') {
+      clipObj = new fabric.value.Circle({
+        ...common,
+        radius: size
+      })
+    } else if (type === 'rounded') {
+      clipObj = new fabric.value.Rect({
+        ...common,
+        width: width,
+        height: height,
+        rx: Math.min(width, height) * 0.15,
+        ry: Math.min(width, height) * 0.15
+      })
+    } else if (type === 'heart') {
+      // 简单的爱心路径
+      const heartSVG =
+        'M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'
+      clipObj = new fabric.value.Path(heartSVG, { ...common })
+      // 适配大小
+      const bounds = clipObj.getBoundingRect()
+      const scale = (Math.min(width, height) / Math.max(bounds.width, bounds.height)) * 0.9
+      clipObj.scale(scale)
+      // 修正中心偏移
+      const center = clipObj.getCenterPoint()
+      clipObj.left = -center.x
+      clipObj.top = -center.y
+    } else if (type === 'star') {
+      // 五角星逻辑
+      const makeStar = (r: number) => {
+        const p = []
+        for (let i = 0; i < 5; i++) {
+          p.push({
+            x: r * Math.cos(((18 + i * 72) * Math.PI) / 180),
+            y: -r * Math.sin(((18 + i * 72) * Math.PI) / 180)
+          })
+          p.push({
+            x: 0.5 * r * Math.cos(((54 + i * 72) * Math.PI) / 180),
+            y: -0.5 * r * Math.sin(((54 + i * 72) * Math.PI) / 180)
+          })
+        }
+        return p
+      }
+      clipObj = new fabric.value.Polygon(makeStar(size), { ...common })
+    }
+
+    if (clipObj) {
+      active.set('clipPath', clipObj)
+      // 清空圆角，避免冲突
+      active.set('corners', 0)
+
+      canvas.value.requestRenderAll()
+      saveHistory()
+      triggerRef(activeObject) // 强制刷新 Vue 状态
     }
   }
 
@@ -2308,13 +2532,191 @@
     link.download = 'project.json'
     link.click()
   }
+  // [新增] 控制导出弹窗显示
+  const showExport = ref(false)
+  // 1. [修改] 原来的 downloadImage 函数，现在只负责打开弹窗
   const downloadImage = () => {
+    showExport.value = true
+  }
+  // 2. [新增] 真正执行导出的函数 (由 ExportDialog 触发)
+  const handleExportConfirm = ({ format, quality, multiplier }: any) => {
+    if (!canvas.value) return
+
+    // 1. 退出所有替身模式 (确保导出的不是虚线框)
     exitAllProxyModes()
-    const dataURL = canvas.value.toDataURL({ format: 'png', quality: 1, multiplier: 2 })
+
+    // 2. 导出数据
+    const dataURL = canvas.value.toDataURL({
+      format: format, // 'png', 'jpeg', 'webp'
+      quality: quality, // 0.1 - 1
+      multiplier: multiplier, // 1x, 2x, 4x
+      enableRetinaScaling: true // 适配视网膜屏
+    })
+
+    // 3. 创建下载链接
     const link = document.createElement('a')
-    link.download = `design-${Date.now()}.png`
+    link.download = `design-${Date.now()}.${format}`
     link.href = dataURL
+    document.body.appendChild(link)
     link.click()
+    document.body.removeChild(link)
+
+    toast.success(`导出成功 (${multiplier}x ${format.toUpperCase()})`)
+  }
+  // index.vue
+
+  // --- [新增] 均分/分布逻辑 ---
+  const distributeObjects = (direction: 'horizontal' | 'vertical') => {
+    const active = canvas.value?.getActiveObject()
+    // 必须是多选模式
+    if (!active || active.type !== 'activeselection') {
+      toast.error('请先框选多个元素')
+      return
+    }
+
+    // 获取选区内的所有对象
+    const objects = active.getObjects()
+    if (objects.length < 3) {
+      toast.error('至少需要选 3 个元素才能均分')
+      return
+    }
+
+    // 1. 获取选区的边界，用于重新计算位置
+    // 注意：在 ActiveSelection 中，对象的 left/top 是相对于选区中心的
+    // 我们需要操作的是 objects 数组
+
+    if (direction === 'horizontal') {
+      // === 水平分布 ===
+
+      // A. 按视觉位置从左到右排序
+      // (obj.left 是相对选区中心的，但这不影响排序)
+      objects.sort((a: any, b: any) => a.left - b.left)
+
+      // B. 获取第一个和最后一个（锚点不动）
+      const first = objects[0]
+      const last = objects[objects.length - 1]
+
+      // C. 计算总可用宽度 (从第一个的左边 到 最后一个的左边)
+      // 这里我们使用 "等间距 (Distribute Centers)" 还是 "等间隙 (Distribute Spacing)"?
+      // 通常 "等间隙" 更常用（物体间距一致）。
+
+      // 计算所有物体的总宽度 (不包含第一个和最后一个，因为它们是边界)
+      // 算法：
+      // totalDistance = (Last.left - First.left)
+      // gap = totalDistance / (count - 1) -> 这是 "中心点均分" 或 "左边缘均分"
+
+      // 我们实现 "Left 边缘均分" (最简单且常用)：
+      // 即：第 i 个对象的 left = 第 0 个 left + i * gap
+
+      const totalDist = last.left - first.left
+      const step = totalDist / (objects.length - 1)
+
+      objects.forEach((obj: any, index: number) => {
+        // 跳过第一个和最后一个，其实算也可以，反正位置不变
+        if (index === 0 || index === objects.length - 1) return
+
+        const newLeft = first.left + index * step
+        obj.set('left', newLeft)
+      })
+    } else {
+      // === 垂直分布 ===
+
+      // A. 从上到下排序
+      objects.sort((a: any, b: any) => a.top - b.top)
+
+      const first = objects[0]
+      const last = objects[objects.length - 1]
+
+      const totalDist = last.top - first.top
+      const step = totalDist / (objects.length - 1)
+
+      objects.forEach((obj: any, index: number) => {
+        if (index === 0 || index === objects.length - 1) return
+
+        const newTop = first.top + index * step
+        obj.set('top', newTop)
+      })
+    }
+
+    // 2. 关键：通知选区更新
+    // 因为我们在选区内部改了子元素坐标，选区的边界框可能需要重新计算
+    // 或者最简单的：保持选区框不变，只变内容
+    active.setCoords()
+    canvas.value.requestRenderAll()
+    saveHistory()
+    toast.success('已自动均分排列')
+  }
+  // index.vue
+
+  // index.vue -> script setup
+
+  const handleRemoveBg = async () => {
+    // 1. 关键：使用 toRaw 获取原始对象，避开 Vue 代理干扰
+    const active = toRaw(canvas.value?.getActiveObject())
+    if (!active || active.type !== 'image') return
+
+    const originalSrc = active.getSrc()
+
+    try {
+      isRemovingBg.value = true
+      toast.info('AI 正在智能抠图...', { duration: 2000 })
+
+      // 2. AI 运算
+      const blob = await removeBackground(originalSrc)
+      const newSrc = URL.createObjectURL(blob)
+
+      // 3. 定义刷新逻辑 (独立函数)
+      const refreshImage = () => {
+        // A. 强制标记脏状态，不仅是 dirty，还要清除缓存
+        active.set('dirty', true)
+        active.set('objectCaching', false) // 暂时关闭缓存，确保重绘
+
+        // B. 重新计算尺寸 (因为抠图后透明区域可能变了，但我们希望维持原大小)
+        // active.scaleToWidth(active.getScaledWidth()) // 可选：保持视觉宽度
+
+        // C. 暴力重绘
+        active.setCoords()
+        canvas.value.renderAll() // 使用 renderAll 而不是 requestRenderAll
+
+        // D. 恢复缓存 (延时一下，性能优化)
+        setTimeout(() => {
+          active.set('objectCaching', true)
+        }, 500)
+
+        // E. 更新状态
+        isRemovingBg.value = false
+        toast.success('抠图完成！')
+
+        // F. 触发 Vue 更新
+        saveHistory()
+        triggerRef(activeObject)
+      }
+
+      // 4. 执行替换 (兼容 Fabric v5 和 v6)
+      // v6 中 setSrc 返回 Promise，v5 使用第二个参数作为回调
+      const ret = active.setSrc(
+        newSrc,
+        () => {
+          // 这是 v5 的回调，或者 v6 也会兼容调用
+          refreshImage()
+        },
+        {
+          crossOrigin: 'anonymous'
+        }
+      )
+
+      // 如果是 v6，setSrc 返回的是 Promise，我们需要 await 它
+      // 这样能确保图片真的加载进内存了
+      if (ret && typeof ret.then === 'function') {
+        await ret
+        // Promise resolve 后再次确保刷新 (双重保险)
+        refreshImage()
+      }
+    } catch (error) {
+      console.error('抠图失败:', error)
+      isRemovingBg.value = false
+      toast.error('处理失败，请重试')
+    }
   }
 </script>
 
@@ -2362,6 +2764,7 @@
 
       <EditorSettings
         :active-object="activeObject"
+        :is-removing-bg="isRemovingBg"
         @update-prop="updateProp"
         @change-layer="changeLayer"
         @delete="deleteActive"
@@ -2371,7 +2774,13 @@
         @ungroup="ungroupObjects"
         @align="alignObject"
         @update-filter="handleImageFilter"
-        @set-as-bg="handleSetBackground" />
+        @set-as-bg="handleSetBackground"
+        @update-text-curve="handleTextCurve"
+        @update-shadow="handleSetShadow"
+        @update-shadow-prop="handleUpdateShadowProp"
+        @update-clip="handleClipImage"
+        @distribute="distributeObjects"
+        @remove-bg="handleRemoveBg" />
 
       <ContextMenu
         :visible="contextMenu.visible"
@@ -2382,6 +2791,8 @@
         :is-group="activeObject?.type === 'group'"
         @close="contextMenu.visible = false"
         @action="handleMenuAction" />
+      <!-- 🟢 [新增] 导出弹窗 (放在这里，覆盖在最上层) -->
+      <ExportDialog :visible="showExport" @close="showExport = false" @confirm="handleExportConfirm" />
       <!-- 🟢 [新增] 剪辑模式操作栏 (浮动在最上层) -->
       <div
         v-if="isCropping"
