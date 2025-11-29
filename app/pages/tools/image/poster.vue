@@ -773,7 +773,7 @@
     saveHistory()
   }
   // [新增] 画布尺寸状态
-  const canvasSize = ref({ width: 600, height: 1000 })
+  const canvasSize = ref({ width: 800, height: 1000 })
   const isReady = ref(false)
 
   // --- 初始化 ---
@@ -823,6 +823,60 @@
         updateLayerList()
         if (evt.includes('selection')) updateActiveObject()
       })
+    })
+    // 1. 定义状态变量
+    let transformStart = { left: 0, top: 0 }
+    let constraintAxis: 'h' | 'v' | null = null // 记录当前锁定的轴向 (h=水平, v=垂直)
+
+    // 2. 监听变换开始：重置状态
+    canvas.value.on('before:transform', (e: any) => {
+      const target = e.transform?.target
+      if (target) {
+        transformStart = {
+          left: target.left,
+          top: target.top
+        }
+        // 每次开始拖拽前，先清空锁定状态
+        constraintAxis = null
+      }
+    })
+
+    // 3. 监听移动：执行锁定
+    canvas.value.on('object:moving', (e: any) => {
+      // 如果没按 Shift，不执行任何锁定逻辑
+      if (!e.e.shiftKey) return
+
+      const obj = e.target
+
+      // 计算当前位置相对于起始位置的偏移量
+      const dx = Math.abs(obj.left - transformStart.left)
+      const dy = Math.abs(obj.top - transformStart.top)
+
+      // --- 关键修改开始 ---
+
+      // A. 如果还没有决定锁哪个轴，进行判断
+      if (!constraintAxis) {
+        // 设置一个防抖阈值 (比如 10px)，防止鼠标微小抖动导致误判
+        // 只有当移动距离足够明显时，才定下方向
+        if (dx > 5 || dy > 5) {
+          if (dx > dy) {
+            constraintAxis = 'h' // 锁定水平移动 (Horizontal)
+          } else {
+            constraintAxis = 'v' // 锁定垂直移动 (Vertical)
+          }
+        }
+      }
+
+      // B. 根据已锁定的方向执行强制归位
+      if (constraintAxis === 'h') {
+        // 既然是水平移动，那么 Top (Y轴) 必须保持不变
+        obj.set('top', transformStart.top)
+      } else if (constraintAxis === 'v') {
+        // 既然是垂直移动，那么 Left (X轴) 必须保持不变
+        obj.set('left', transformStart.left)
+      }
+
+      // --- 关键修改结束 ---
     })
     // 🟢 [核心修复] 监听缩放事件，实现“不失真调整大小”
     canvas.value.on('object:scaling', (e: any) => {
@@ -961,9 +1015,10 @@
 
     // 限制一下最大 100% (如果屏幕很大，就显示 100%，不要放大到模糊)
     // 或者限制最小 10%
-    if (scale > 1) scale = 1
-    if (scale < 0.1) scale = 0.1
 
+    if (scale < 0.1) scale = 0.1
+    // 减去一点点微调，防止计算误差导致出现滚动条
+    scale = scale * 0.98
     // 更新 zoomLevel (EditorWorkspace 会根据这个值进行 CSS transform)
     zoomLevel.value = Math.floor(scale * 100)
   }
@@ -1120,7 +1175,11 @@
     // 1. 监听对象移动
     canvas.value.on('object:moving', (e: any) => {
       const activeObject = e.target
-
+      // 🟢 [新增] 如果按住了 Shift (正在进行轴向锁定)，则禁用智能吸附，防止冲突
+      if (e.e.shiftKey) {
+        guidelines = [] // 清空辅助线
+        return // 直接退出，不计算吸附
+      }
       // 性能优化：如果选择了多个物体，计算量太大，暂时禁用吸附
       if (activeObject.type === 'activeSelection') {
         guidelines = []
