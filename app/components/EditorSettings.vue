@@ -2,7 +2,7 @@
   import { computed, ref, watch, nextTick } from 'vue'
 
   // --- 1. Props & Emits ---
-  const props = defineProps<{ activeObject: any; isRemovingBg?: boolean }>()
+  const props = defineProps<{ activeObject: any; isRemovingBg?: boolean; isMosaicMode?: boolean }>()
 
   const emit = defineEmits([
     'update-prop',
@@ -21,9 +21,11 @@
     'update-clip',
     'distribute', // [新增]
     'remove-bg', // [新增]
-    'update-text-texture'
+    'update-text-texture',
+    'toggle-mosaic',
+    'set-mosaic-width'
   ])
-
+  const brushSize = ref(30) // 默认值
   // --- 2. 响应式同步机制 ---
   const uiTick = ref(0)
 
@@ -515,6 +517,48 @@
 
           <p class="text-[10px] text-gray-400 text-center px-2">✨ 自动识别主体，移除背景 (首次运行需下载模型)</p>
         </div>
+        <!-- 🟢 马赛克画笔控制区 -->
+        <!-- <div class="pt-4 border-t border-gray-100 space-y-3">
+        <label class="section-title">马赛克画笔</label>
+
+
+        <div v-if="!isMosaicMode">
+          <button
+            @click="$emit('toggle-mosaic', true)"
+            class="w-full py-2.5 border border-dashed border-indigo-300 rounded-lg text-xs text-indigo-600 hover:bg-indigo-50 flex items-center justify-center gap-2 transition">
+            <span class="text-base">🖌️</span>
+            <span>开启马赛克涂抹</span>
+          </button>
+        </div>
+
+
+        <div v-else class="bg-indigo-50 p-3 rounded-lg border border-indigo-100 animate-fade-in">
+          <p class="text-[10px] text-indigo-500 mb-2 font-medium text-center">
+            在画布上涂抹需要打码的区域
+          </p>
+
+          <div class="control-group mb-3">
+            <div class="label-row">
+              <span>笔触粗细</span>
+              <span class="val">{{ brushSize }}px</span>
+            </div>
+            <input
+              type="range"
+              v-model.number="brushSize"
+              @input="$emit('set-mosaic-width', brushSize)"
+              min="10" max="100"
+              class="range-input"
+            />
+          </div>
+
+          <button
+            @click="$emit('toggle-mosaic', false)"
+            class="w-full py-2 bg-white border border-gray-200 rounded text-xs text-gray-700 hover:bg-gray-50 shadow-sm transition">
+            退出涂抹模式
+          </button>
+        </div>
+      </div> -->
+
         <!-- EditorSettings.vue -> isImage 区块内 -->
 
         <!-- EditorSettings.vue -> isImage -> 形状裁剪区块 -->

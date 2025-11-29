@@ -3287,22 +3287,25 @@
         :active-object="activeObject"
         :is-removing-bg="isRemovingBg"
         @update-prop="updateProp"
+          @delete="deleteActive"
+           @group="groupObjects"
+        @ungroup="ungroupObjects"
+ @remove-bg="handleRemoveBg"
+ @update-text-texture="handleTextTexture"
+ @update-clip="handleClipImage"
+  @set-as-bg="handleSetBackground"
+
         @change-layer="changeLayer"
-        @delete="deleteActive"
         @toggle-style="toggleStyle"
         @update-image-radius="handleImageRadius"
-        @group="groupObjects"
-        @ungroup="ungroupObjects"
         @align="alignObject"
         @update-filter="handleImageFilter"
-        @set-as-bg="handleSetBackground"
         @update-text-curve="handleTextCurve"
         @update-shadow="handleSetShadow"
         @update-shadow-prop="handleUpdateShadowProp"
-        @update-clip="handleClipImage"
         @distribute="distributeObjects"
-        @remove-bg="handleRemoveBg"
-        @update-text-texture="handleTextTexture" />
+
+         />
 
       <ContextMenu
         :visible="contextMenu.visible"

@@ -120,7 +120,18 @@
     const c = canvas.value
 
     // 基础 Fabric 事件
-    c.on('selection:created', updateActiveObject)
+    // 🟢 监听选中事件
+    c.on('selection:created', e => {
+      // 如果当前是马赛克模式，且选中的不是正在画的东西（虽然drawing模式下很难选中别的）
+      // 但为了保险：
+      if (effects.isMosaicBrushMode.value) {
+        effects.exitMosaicMode()
+
+        // 重新选中刚才点击的物体 (因为 exitMosaicMode 可能会重置画笔导致选中丢失)
+        // c.setActiveObject(e.selected[0])
+      }
+      updateActiveObject(e)
+    })
     c.on('selection:updated', updateActiveObject)
     c.on('selection:cleared', () => (activeObject.value = null))
     c.on('object:modified', saveHistory)
@@ -196,7 +207,7 @@
       isCopying = false
     })
 
-// --- 鼠标按下 (工具分流) ---
+    // --- 鼠标按下 (工具分流) ---
     c.on('mouse:down', (opt: any) => {
       // 1. 剪裁模式：点击外部确认
       if (tools.isCropping.value) {
@@ -458,18 +469,18 @@
   // 右键菜单动作
   const handleMenuAction = (action: string) => {
     contextMenu.value.visible = false
-    if (action === 'copy') copy()
-    if (action === 'paste') paste()
-    if (action === 'delete') deleteActive()
-    if (action === 'group') groupObjects()
-    if (action === 'ungroup') ungroupObjects()
-    if (action === 'layer-top') changeLayer('top')
-    if (action === 'layer-bottom') changeLayer('bottom')
+    if (action === 'copy') objects.copy()
+    if (action === 'paste') objects.paste()
+    if (action === 'delete') objects.deleteActive()
+    if (action === 'group') objects.groupObjects()
+    if (action === 'ungroup') objects.ungroupObjects()
+    if (action === 'layer-top') objects.changeLayer('top')
+    if (action === 'layer-bottom') objects.changeLayer('bottom')
     // [新增] 处理设为背景
-    if (action === 'set-bg') handleSetBackground()
+    if (action === 'set-bg') effects.handleSetBackground()
     // 🟢 [新增]
-    if (action === 'copyStyle') copyStyle()
-    if (action === 'pasteStyle') pasteStyle()
+    if (action === 'copyStyle') objects.copyStyle()
+    if (action === 'pasteStyle') objects.pasteStyle()
   }
   const showExport = ref(false)
   const downloadImage = () => {
@@ -746,6 +757,7 @@
       <EditorSettings
         :active-object="activeObject"
         :is-removing-bg="effects.isRemovingBg.value"
+        :is-mosaic-mode="effects.isMosaicBrushMode.value"
         @update-prop="objects.updateProp"
         @delete="objects.deleteActive"
         @group="objects.groupObjects"
@@ -762,7 +774,9 @@
         @update-text-curve="objects.handleTextCurve"
         @update-shadow="objects.handleSetShadow"
         @update-shadow-prop="objects.handleUpdateShadowProp"
-        @distribute="objects.distributeObjects" />
+        @distribute="objects.distributeObjects"
+        @toggle-mosaic="effects.toggleMosaicBrush"
+        @set-mosaic-width="effects.setMosaicWidth" />
 
       <ContextMenu
         :visible="contextMenu.visible"

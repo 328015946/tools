@@ -96,9 +96,16 @@ export function useTools(canvas: any, fabric: any, saveHistory: Function) {
 
   const startCrop = (image: any) => {
     if (!canvas.value || isCropping.value) return
+
+    // 获取图片的原始尺寸 (Natural Width/Height)
+    // 兼容性写法：不同版本的 fabric 获取方式不同，优先取 getOriginalSize
     const originalSize = image.getOriginalSize
       ? image.getOriginalSize()
       : { width: image._element.naturalWidth, height: image._element.naturalHeight }
+    const naturalWidth = originalSize.width
+    const naturalHeight = originalSize.height
+
+    // 1. 备份状态 (备份当前的裁剪参数，用于取消)
     cropBackup.value = {
       cropX: image.cropX || 0,
       cropY: image.cropY || 0,
@@ -110,35 +117,80 @@ export function useTools(canvas: any, fabric: any, saveHistory: Function) {
       top: image.top,
       angle: image.angle
     }
+
     isCropping.value = true
     croppingTarget.value = image
+
+    // 2. 锁定图片
     image.selectable = false
     image.evented = false
+    // 旋转归零，方便计算
     image.rotate(0)
     image.setCoords()
 
-    const zoneW = image.width * image.scaleX
-    const zoneH = image.height * image.scaleY
-    // 恢复全图逻辑 (略，保持原有逻辑) ...
-    // 为了节省空间，假设这里是还原图片为全图的代码
-    // ...
-    // 创建裁剪框
+    // 3. 计算裁剪框 (Zone) 的位置
+    // Zone 应该刚好盖住图片当前“可见”的区域
+    // 此时 image.width 是裁剪后的宽度 (如果之前裁过)，所以直接用 visuals
+    const zoneWidth = image.width * image.scaleX
+    const zoneHeight = image.height * image.scaleY
+    const zoneLeft = image.left
+    const zoneTop = image.top
+
+    // 4. 【关键步骤】还原图片为“全景原图”
+    // 我们要计算：当图片恢复全大小时，它应该放在哪里，才能让画面不跳动？
+
+    const currentCropX = image.cropX || 0
+    const currentCropY = image.cropY || 0
+
+    // 计算 Zone 左上角在屏幕的绝对坐标
+    const zoneTL = {
+      x: zoneLeft - zoneWidth / 2,
+      y: zoneTop - zoneHeight / 2
+    }
+
+    // 计算“全景原图”的左上角应该在哪里
+    // 原理：全图左上角 = Zone左上角 - (左侧被裁掉的量 * 缩放)
+    const fullImgTL = {
+      x: zoneTL.x - currentCropX * image.scaleX,
+      y: zoneTL.y - currentCropY * image.scaleY
+    }
+
+    // 恢复图片属性为全图
+    image.set({
+      width: naturalWidth,
+      height: naturalHeight,
+      cropX: 0,
+      cropY: 0,
+      // 重新定位中心点
+      left: fullImgTL.x + (naturalWidth * image.scaleX) / 2,
+      top: fullImgTL.y + (naturalHeight * image.scaleY) / 2
+    })
+
+    // 移除可能残留的 clipPath (防止旧数据干扰)
+    image.set('clipPath', null)
+    image.setCoords()
+
+    // 5. 创建裁剪框
     const zone = new fabric.value.Rect({
-      left: image.left,
-      top: image.top,
-      width: zoneW,
-      height: zoneH,
+      left: zoneLeft,
+      top: zoneTop,
+      width: zoneWidth,
+      height: zoneHeight,
       fill: 'rgba(0,0,0,0.3)',
       stroke: '#3b82f6',
       strokeWidth: 2,
       strokeDashArray: [5, 5],
+      cornerColor: '#ffffff',
+      cornerStrokeColor: '#3b82f6',
       transparentCorners: false,
       absolutePositioned: true,
       originX: 'center',
       originY: 'center',
       lockRotation: true,
       hasRotatingPoint: false
+      // 允许任意比例缩放
     })
+
     canvas.value.add(zone)
     canvas.value.setActiveObject(zone)
     cropZone.value = zone
@@ -147,39 +199,93 @@ export function useTools(canvas: any, fabric: any, saveHistory: Function) {
 
   const confirmCrop = () => {
     if (!canvas.value || !croppingTarget.value || !cropZone.value) return
-    const img = croppingTarget.value
-    const zone = cropZone.value
-    // 计算 cropX, cropY (保持原有逻辑) ...
-    // 简单模拟:
-    const scaleX = img.scaleX
-    const scaleY = img.scaleY
-    const cropX = (zone.left - (zone.width * zone.scaleX) / 2 - (img.left - (img.width * img.scaleX) / 2)) / scaleX
-    // ...
-    // img.set({ cropX, ... })
 
-    // 清理
-    img.selectable = true
-    img.evented = true
-    img.rotate(cropBackup.value.angle)
+    const image = croppingTarget.value
+    const zone = cropZone.value
+
+    // 此时 image 是全景原图 (Angle=0)，Zone 是裁剪区域
+
+    // 1. 计算 Zone 左上角
+    const zoneTL = {
+      x: zone.left - (zone.width * zone.scaleX) / 2,
+      y: zone.top - (zone.height * zone.scaleY) / 2
+    }
+
+    // 2. 计算 Image (全图) 左上角
+    const imgTL = {
+      x: image.left - (image.width * image.scaleX) / 2,
+      y: image.top - (image.height * image.scaleY) / 2
+    }
+
+    // 3. 计算相对偏移量 (这就是 cropX/cropY)
+    // 偏移量 = (Zone左边 - 图片左边) / 缩放
+    const cropX = Math.max(0, (zoneTL.x - imgTL.x) / image.scaleX)
+    const cropY = Math.max(0, (zoneTL.y - imgTL.y) / image.scaleY)
+
+    // 4. 计算新的宽高 (这就是 width/height)
+    const width = (zone.width * zone.scaleX) / image.scaleX
+    const height = (zone.height * zone.scaleY) / image.scaleY
+
+    // 5. 应用到图片
+    image.set({
+      cropX: cropX,
+      cropY: cropY,
+      width: width,
+      height: height,
+      // 【核心】图片中心点移动到 Zone 的中心点
+      left: zone.left,
+      top: zone.top
+    })
+
+    // 6. 恢复交互状态
+    image.selectable = true
+    image.evented = true
+    image.rotate(cropBackup.value.angle) // 恢复之前的旋转
+
+    // 7. 清理
     canvas.value.remove(zone)
     cropZone.value = null
     croppingTarget.value = null
     isCropping.value = false
+
     canvas.value.requestRenderAll()
     saveHistory()
   }
 
   const cancelCrop = () => {
     if (!canvas.value || !croppingTarget.value) return
-    const img = croppingTarget.value
-    img.set(cropBackup.value)
-    img.setCoords()
-    img.selectable = true
-    img.evented = true
-    if (cropZone.value) canvas.value.remove(cropZone.value)
+
+    const image = croppingTarget.value
+    const backup = cropBackup.value
+
+    // 1. 恢复所有属性
+    image.set({
+      cropX: backup.cropX,
+      cropY: backup.cropY,
+      width: backup.width,
+      height: backup.height,
+      scaleX: backup.scaleX,
+      scaleY: backup.scaleY,
+      left: backup.left,
+      top: backup.top,
+      angle: backup.angle,
+      clipPath: null // 确保没有 clipPath 干扰
+    })
+
+    image.setCoords()
+
+    // 2. 恢复交互
+    image.selectable = true
+    image.evented = true
+
+    if (cropZone.value) {
+      canvas.value.remove(cropZone.value)
+    }
+
     cropZone.value = null
     croppingTarget.value = null
     isCropping.value = false
+
     canvas.value.requestRenderAll()
   }
 
