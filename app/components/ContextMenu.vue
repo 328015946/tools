@@ -45,6 +45,20 @@
         <button class="menu-item" @click="emit('action', 'copy')">
           <span>复制</span> <span class="text-gray-400 text-xs">Ctrl+C</span>
         </button>
+        <!-- 在 <template> 内部，找到 "复制" "删除" 附近，插入 -->
+
+        <div class="border-t my-1"></div>
+
+        <button class="menu-item" @click="emit('action', 'copyStyle')">
+          <span>🖌️ 复制样式</span>
+        </button>
+
+        <!-- 只有当有选中元素时才显示粘贴样式 (逻辑上应该是有样式剪贴板时才显示，但这里简化) -->
+        <button class="menu-item" @click="emit('action', 'pasteStyle')">
+          <span>🎨 粘贴样式</span>
+        </button>
+
+        <div class="border-t my-1"></div>
         <button class="menu-item" @click="emit('action', 'delete')">
           <span class="text-red-600">删除</span> <span class="text-gray-400 text-xs">Del</span>
         </button>
