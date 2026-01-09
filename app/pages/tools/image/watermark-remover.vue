@@ -33,6 +33,19 @@
               class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700" />
           </div>
 
+          <div class="space-y-2">
+            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">修复算法</label>
+            <select
+              v-model="selectedAlgorithm"
+              class="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 dark:text-gray-200">
+              <option value="texture">纹理填充 (效果好)</option>
+              <option value="pixel">像素扩散 (速度快)</option>
+              <option value="average">均值填充 (适合纯色)</option>
+              <option value="horizontal">水平填充 (适合横纹)</option>
+              <option value="vertical">垂直填充 (适合竖纹/衣物)</option>
+            </select>
+          </div>
+
           <div class="flex gap-2">
             <button
               @click="toggleDrawingMode"
@@ -62,6 +75,13 @@
               v-if="isProcessing"
               class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></span>
             {{ isProcessing ? t('watermark_remover.processing') : t('watermark_remover.remove_btn') }}
+          </button>
+
+          <button
+            v-if="hasImage"
+            @click="resetImage"
+            class="w-full py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition">
+            {{ t('watermark_remover.reset') || '重置图片' }}
           </button>
 
           <button
@@ -114,7 +134,9 @@
   const isDragging = ref(false)
   const isProcessing = ref(false)
   const brushSize = ref(20)
+  const selectedAlgorithm = ref('texture')
   const resultImage = ref<string | null>(null)
+  const originalImageUrl = ref<string | null>(null)
 
   // 初始化 Canvas
   onMounted(() => {
@@ -182,6 +204,7 @@
     const reader = new FileReader()
     reader.onload = f => {
       const data = f.target?.result as string
+      originalImageUrl.value = data // 保存原始图片用于重置
       fabric.FabricImage.fromURL(data).then(img => {
         const canvas = fabricCanvas.value!
 
@@ -214,6 +237,28 @@
       })
     }
     reader.readAsDataURL(file)
+  }
+
+  const resetImage = () => {
+    if (!originalImageUrl.value || !fabricCanvas.value) return
+
+    fabric.FabricImage.fromURL(originalImageUrl.value).then(img => {
+      const canvas = fabricCanvas.value!
+      const bgColor = canvas.backgroundColor
+      canvas.clear()
+      canvas.backgroundColor = bgColor
+      canvas.backgroundImage = img
+      canvas.renderAll()
+
+      // 恢复画笔状态
+      const brush = new fabric.PencilBrush(canvas)
+      brush.color = 'rgba(255, 0, 0, 0.5)'
+      brush.width = brushSize.value
+      canvas.freeDrawingBrush = brush
+      canvas.isDrawingMode = true
+      isDrawing.value = true
+      resultImage.value = null
+    })
   }
 
   const toggleDrawingMode = () => {
@@ -299,7 +344,18 @@
       const maskData = ctxMask.getImageData(0, 0, width, height)
 
       // 3. 执行修复算法
-      const resultImageData = performInpainting(imgData, maskData)
+      let resultImageData: ImageData
+      if (selectedAlgorithm.value === 'texture') {
+        resultImageData = inpaintTextureSynthesis(imgData, maskData)
+      } else if (selectedAlgorithm.value === 'pixel') {
+        resultImageData = inpaintPixelDiffusion(imgData, maskData)
+      } else if (selectedAlgorithm.value === 'average') {
+        resultImageData = inpaintAverage(imgData, maskData)
+      } else if (selectedAlgorithm.value === 'horizontal') {
+        resultImageData = inpaintHorizontal(imgData, maskData)
+      } else {
+        resultImageData = inpaintVertical(imgData, maskData)
+      }
 
       // 将结果写回 Canvas
       const resultCanvas = document.createElement('canvas')
@@ -327,8 +383,8 @@
     }
   }
 
-  // 简单的像素扩散修复算法 (Iterative Boundary Filling)
-  function performInpainting(imgData: ImageData, maskData: ImageData): ImageData {
+  // 算法1：纹理合成 (Patch-based Inpainting) - 效果较好，适合复杂背景
+  function inpaintTextureSynthesis(imgData: ImageData, maskData: ImageData): ImageData {
     const { width, height, data } = imgData
     const mask = maskData.data
 
@@ -338,7 +394,6 @@
 
     for (let i = 0; i < width * height; i++) {
       if (mask[i * 4] > 100) {
-        // 白色区域为遮罩
         isMask[i] = 1
         totalMaskPixels++
       }
@@ -346,7 +401,183 @@
 
     if (totalMaskPixels === 0) return imgData
 
+    // 搜索配置
+    const searchRadius = 20 // 搜索半径，越大越慢但效果越好
+    const patchSize = 3 // 补丁大小 (3x3)
+    const halfPatch = 1
     const maxIterations = 500 // 防止死循环
+
+    let iteration = 0
+
+    while (totalMaskPixels > 0 && iteration < maxIterations) {
+      iteration++
+      let filledInPass = 0
+      const nextData = new Uint8ClampedArray(data)
+      const nextIsMask = new Uint8Array(isMask)
+
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = y * width + x
+
+          // 只处理当前边界上的遮罩像素
+          if (isMask[idx] === 1) {
+            let validNeighbors = 0
+
+            // 1. 检查是否有有效邻居
+            for (let dy = -1; dy <= 1; dy++) {
+              for (let dx = -1; dx <= 1; dx++) {
+                if (dx === 0 && dy === 0) continue
+                const nx = x + dx,
+                  ny = y + dy
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height && isMask[ny * width + nx] === 0) {
+                  validNeighbors++
+                }
+              }
+            }
+
+            if (validNeighbors > 0) {
+              // 这是一个边界像素，尝试修复
+
+              // 策略：在周围随机采样寻找最佳匹配块 (Texture Synthesis)
+              let bestR = 0,
+                bestG = 0,
+                bestB = 0
+              let minError = Number.MAX_VALUE
+              let foundMatch = false
+
+              // 尝试采样次数 (性能与质量的权衡)
+              const samples = 10
+
+              for (let k = 0; k < samples; k++) {
+                // 随机取样点
+                const sx = x + Math.floor((Math.random() - 0.5) * 2 * searchRadius)
+                const sy = y + Math.floor((Math.random() - 0.5) * 2 * searchRadius)
+
+                if (sx < 0 || sx >= width || sy < 0 || sy >= height) continue
+
+                const sIdx = sy * width + sx
+                if (isMask[sIdx] === 1) continue // 样本点必须是有效的
+
+                // 计算 3x3 补丁差异
+                let error = 0
+                let count = 0
+
+                for (let py = -halfPatch; py <= halfPatch; py++) {
+                  for (let px = -halfPatch; px <= halfPatch; px++) {
+                    const tx = x + px,
+                      ty = y + py
+                    const sourceX = sx + px,
+                      sourceY = sy + py
+
+                    if (
+                      tx >= 0 &&
+                      tx < width &&
+                      ty >= 0 &&
+                      ty < height &&
+                      sourceX >= 0 &&
+                      sourceX < width &&
+                      sourceY >= 0 &&
+                      sourceY < height
+                    ) {
+                      const tIdx = ty * width + tx
+                      // 只比较目标区域中已知的像素
+                      if (isMask[tIdx] === 0) {
+                        const sOff = (sourceY * width + sourceX) * 4
+                        const tOff = tIdx * 4
+
+                        const dr = data[tOff] - data[sOff]
+                        const dg = data[tOff + 1] - data[sOff + 1]
+                        const db = data[tOff + 2] - data[sOff + 2]
+                        error += dr * dr + dg * dg + db * db
+                        count++
+                      }
+                    }
+                  }
+                }
+
+                if (count > 0) {
+                  error = error / count
+                  if (error < minError) {
+                    minError = error
+                    const bestOff = sIdx * 4
+                    bestR = data[bestOff]
+                    bestG = data[bestOff + 1]
+                    bestB = data[bestOff + 2]
+                    foundMatch = true
+                  }
+                }
+              }
+
+              const off = idx * 4
+
+              if (foundMatch) {
+                // 使用找到的最佳匹配
+                nextData[off] = bestR
+                nextData[off + 1] = bestG
+                nextData[off + 2] = bestB
+                nextData[off + 3] = 255
+              } else {
+                // 没找到匹配（比如孤立点），回退到简单的均值模糊
+                let rSum = 0,
+                  gSum = 0,
+                  bSum = 0,
+                  count = 0
+                for (let dy = -1; dy <= 1; dy++) {
+                  for (let dx = -1; dx <= 1; dx++) {
+                    const nx = x + dx,
+                      ny = y + dy
+                    if (nx >= 0 && nx < width && ny >= 0 && ny < height && isMask[ny * width + nx] === 0) {
+                      const nOff = (ny * width + nx) * 4
+                      rSum += data[nOff]
+                      gSum += data[nOff + 1]
+                      bSum += data[nOff + 2]
+                      count++
+                    }
+                  }
+                }
+                if (count > 0) {
+                  nextData[off] = Math.floor(rSum / count)
+                  nextData[off + 1] = Math.floor(gSum / count)
+                  nextData[off + 2] = Math.floor(bSum / count)
+                  nextData[off + 3] = 255
+                }
+              }
+
+              nextIsMask[idx] = 0
+              filledInPass++
+              totalMaskPixels--
+            }
+          }
+        }
+      }
+
+      data.set(nextData)
+      isMask.set(nextIsMask)
+
+      if (filledInPass === 0) break
+    }
+
+    return imgData
+  }
+
+  // 算法2：像素扩散 (Pixel Diffusion) - 速度快，适合纯色或简单背景
+  function inpaintPixelDiffusion(imgData: ImageData, maskData: ImageData): ImageData {
+    const { width, height, data } = imgData
+    const mask = maskData.data
+
+    const isMask = new Uint8Array(width * height)
+    let totalMaskPixels = 0
+
+    for (let i = 0; i < width * height; i++) {
+      if (mask[i * 4] > 100) {
+        isMask[i] = 1
+        totalMaskPixels++
+      }
+    }
+
+    if (totalMaskPixels === 0) return imgData
+
+    const maxIterations = 500
     let iteration = 0
 
     while (totalMaskPixels > 0 && iteration < maxIterations) {
@@ -364,23 +595,17 @@
               bSum = 0,
               count = 0
 
-            // 检查 8 邻域
             for (let dy = -1; dy <= 1; dy++) {
               for (let dx = -1; dx <= 1; dx++) {
                 if (dx === 0 && dy === 0) continue
-
-                const nx = x + dx
-                const ny = y + dy
-
-                if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                  const nIdx = ny * width + nx
-                  if (isMask[nIdx] === 0) {
-                    const off = nIdx * 4
-                    rSum += data[off]
-                    gSum += data[off + 1]
-                    bSum += data[off + 2]
-                    count++
-                  }
+                const nx = x + dx,
+                  ny = y + dy
+                if (nx >= 0 && nx < width && ny >= 0 && ny < height && isMask[ny * width + nx] === 0) {
+                  const off = (ny * width + nx) * 4
+                  rSum += data[off]
+                  gSum += data[off + 1]
+                  bSum += data[off + 2]
+                  count++
                 }
               }
             }
@@ -398,13 +623,180 @@
           }
         }
       }
-
       data.set(nextData)
       isMask.set(nextIsMask)
-
       if (filledInPass === 0) break
     }
+    return imgData
+  }
 
+  // 算法3：均值填充 (Average Fill) - 极快，适合纯色背景的小污点
+  function inpaintAverage(imgData: ImageData, maskData: ImageData): ImageData {
+    const { width, height, data } = imgData
+    const mask = maskData.data
+
+    let rSum = 0,
+      gSum = 0,
+      bSum = 0,
+      count = 0
+
+    // 扫描边界像素计算平均值
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = y * width + x
+        if (mask[idx * 4] > 100) continue // 跳过遮罩区域
+
+        // 检查是否是边界（即邻居中有遮罩）
+        let isBoundary = false
+        if (
+          (x > 0 && mask[(idx - 1) * 4] > 100) ||
+          (x < width - 1 && mask[(idx + 1) * 4] > 100) ||
+          (y > 0 && mask[(idx - width) * 4] > 100) ||
+          (y < height - 1 && mask[(idx + width) * 4] > 100)
+        ) {
+          isBoundary = true
+        }
+
+        if (isBoundary) {
+          const off = idx * 4
+          rSum += data[off]
+          gSum += data[off + 1]
+          bSum += data[off + 2]
+          count++
+        }
+      }
+    }
+
+    if (count === 0) return imgData
+
+    const avgR = Math.floor(rSum / count)
+    const avgG = Math.floor(gSum / count)
+    const avgB = Math.floor(bSum / count)
+
+    // 填充所有遮罩区域
+    for (let i = 0; i < width * height; i++) {
+      if (mask[i * 4] > 100) {
+        const off = i * 4
+        data[off] = avgR
+        data[off + 1] = avgG
+        data[off + 2] = avgB
+        data[off + 3] = 255
+      }
+    }
+    return imgData
+  }
+
+  // 算法4：水平填充 (Horizontal Fill) - 适合横向纹理或文字
+  function inpaintHorizontal(imgData: ImageData, maskData: ImageData): ImageData {
+    const { width, height, data } = imgData
+    const mask = maskData.data
+
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const idx = y * width + x
+        if (mask[idx * 4] > 100) {
+          // 找到当前行的遮罩段
+          let startX = x
+          while (x < width && mask[(y * width + x) * 4] > 100) x++
+          let endX = x
+
+          // 获取左右两侧颜色
+          let rL = 0,
+            gL = 0,
+            bL = 0,
+            hasL = false
+          if (startX > 0) {
+            const off = (y * width + startX - 1) * 4
+            rL = data[off]
+            gL = data[off + 1]
+            bL = data[off + 2]
+            hasL = true
+          }
+          let rR = 0,
+            gR = 0,
+            bR = 0,
+            hasR = false
+          if (endX < width) {
+            const off = (y * width + endX) * 4
+            rR = data[off]
+            gR = data[off + 1]
+            bR = data[off + 2]
+            hasR = true
+          }
+
+          // 线性插值填充
+          for (let k = startX; k < endX; k++) {
+            const off = (y * width + k) * 4
+            let ratio = 0.5
+            if (hasL && hasR) ratio = (k - startX + 1) / (endX - startX + 1)
+            else if (hasL) ratio = 0
+            else if (hasR) ratio = 1
+
+            data[off] = rL * (1 - ratio) + rR * ratio
+            data[off + 1] = gL * (1 - ratio) + gR * ratio
+            data[off + 2] = bL * (1 - ratio) + bR * ratio
+            data[off + 3] = 255
+          }
+        }
+      }
+    }
+    return imgData
+  }
+
+  // 算法5：垂直填充 (Vertical Fill) - 适合竖向纹理或衣物褶皱
+  function inpaintVertical(imgData: ImageData, maskData: ImageData): ImageData {
+    const { width, height, data } = imgData
+    const mask = maskData.data
+
+    for (let x = 0; x < width; x++) {
+      for (let y = 0; y < height; y++) {
+        const idx = y * width + x
+        if (mask[idx * 4] > 100) {
+          // 找到当前列的遮罩段
+          let startY = y
+          while (y < height && mask[(y * width + x) * 4] > 100) y++
+          let endY = y
+
+          // 获取上下两侧颜色
+          let rT = 0,
+            gT = 0,
+            bT = 0,
+            hasT = false
+          if (startY > 0) {
+            const off = ((startY - 1) * width + x) * 4
+            rT = data[off]
+            gT = data[off + 1]
+            bT = data[off + 2]
+            hasT = true
+          }
+          let rB = 0,
+            gB = 0,
+            bB = 0,
+            hasB = false
+          if (endY < height) {
+            const off = (endY * width + x) * 4
+            rB = data[off]
+            gB = data[off + 1]
+            bB = data[off + 2]
+            hasB = true
+          }
+
+          // 线性插值填充
+          for (let k = startY; k < endY; k++) {
+            const off = (k * width + x) * 4
+            let ratio = 0.5
+            if (hasT && hasB) ratio = (k - startY + 1) / (endY - startY + 1)
+            else if (hasT) ratio = 0
+            else if (hasB) ratio = 1
+
+            data[off] = rT * (1 - ratio) + rB * ratio
+            data[off + 1] = gT * (1 - ratio) + gB * ratio
+            data[off + 2] = bT * (1 - ratio) + bB * ratio
+            data[off + 3] = 255
+          }
+        }
+      }
+    }
     return imgData
   }
 

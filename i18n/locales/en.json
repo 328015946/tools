@@ -1072,6 +1072,7 @@
     "download": "Download Result",
     "placeholder": "Please upload an image to start editing",
     "success": "Watermark removed successfully!",
-    "error": "Processing failed, please try again"
+    "error": "Processing failed, please try again",
+    "reset": "Reset"
   }
 }

@@ -1072,6 +1072,7 @@
     "download": "下载结果",
     "placeholder": "请上传图片开始编辑",
     "success": "去水印完成！",
-    "error": "处理失败，请重试"
+    "error": "处理失败，请重试",
+    "reset": "重置"
   }
 }
