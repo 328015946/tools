@@ -1,0 +1,31 @@
+# 1. 敏感信息 (最重要)
+.env*
+secrets/
+certs/
+*.pem
+*.key
+
+# 2. 依赖与构建产物 (AI 不需要看这些，且体积巨大)
+node_modules/
+dist/
+build/
+.npm/
+package-lock.json
+yarn.lock
+yarn-error.log
+
+# 3. 静态资源 (除非你正在询问关于图片路径的问题)
+src/assets/**/*.png
+src/assets/**/*.jpg
+src/assets/**/*.svg
+public/
+
+# 4. 缓存与日志
+.cache/
+.eslintcache
+*.log
+logs/
+
+# 5. 编辑器私有配置
+.vscode/
+.idea/

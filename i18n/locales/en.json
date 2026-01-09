@@ -1058,5 +1058,20 @@
   "poster_design": {
     "title": "Poster Designer",
     "desc": "Online poster design tool. Supports custom backgrounds, drag-and-drop elements, text editing, and HD export."
+  },
+  "watermark_remover": {
+    "title": "AI Watermark Remover",
+    "desc": "Paint over the watermark, AI will restore the background",
+    "upload": "Upload Image",
+    "brush_size": "Brush Size",
+    "drawing": "Drawing...",
+    "start_draw": "Start Painting",
+    "clear": "Clear",
+    "processing": "Processing...",
+    "remove_btn": "Remove Watermark",
+    "download": "Download Result",
+    "placeholder": "Please upload an image to start editing",
+    "success": "Watermark removed successfully!",
+    "error": "Processing failed, please try again"
   }
 }

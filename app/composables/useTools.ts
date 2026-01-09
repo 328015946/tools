@@ -558,6 +558,16 @@ export const useTools = () => {
       category: 'nav.image_tools', // 归类到图片工具
       categorySlug: 'image',
       path: '/tools/image/poster' // ⚠️ 注意：文件路径需要匹配
+    },
+    {
+      id: 54,
+      nameKey: 'watermark_remover.title',
+      descKey: 'watermark_remover.desc',
+      icon: '🧼',
+      color: 'bg-indigo-100 text-indigo-600',
+      category: 'nav.image_tools',
+      categorySlug: 'image',
+      path: '/tools/image/watermark-remover'
     }
   ]
 
