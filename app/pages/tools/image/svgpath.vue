@@ -183,7 +183,8 @@
 </template>
 
 <script setup lang="ts">
-  import { parseSVG, makeAbsolute } from 'svg-path-parser'
+  import pkg from 'svg-path-parser'
+  const { parseSVG, makeAbsolute } = pkg;
 
   const { t } = useI18n()
 
