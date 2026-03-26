@@ -231,7 +231,7 @@
     layout: 'blank' // 如果你有 blank 布局的话。如果没有，保持默认也行，但可能要注意 padding
   })
 
-  useHead({ title: t('editor.title') + ' - NuxtTools' })
+  useHead({ title: t('editor.title') + ' - 小宾果' })
 </script>
 
 <style>

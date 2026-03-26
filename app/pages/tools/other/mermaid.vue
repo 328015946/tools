@@ -182,5 +182,5 @@
     }
   }
 
-  useHead({ title: t('mermaid.title') + ' - NuxtTools' })
+  useHead({ title: t('mermaid.title') + ' - 小宾果' })
 </script>

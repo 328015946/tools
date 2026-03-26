@@ -138,7 +138,7 @@
       .replace(/'/g, '&#039;')
   }
 
-  useHead({ title: t('regex.title') + ' - NuxtTools' })
+  useHead({ title: t('regex.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

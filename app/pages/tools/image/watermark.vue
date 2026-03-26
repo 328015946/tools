@@ -131,7 +131,7 @@
 
   // 水印配置
   const config = reactive({
-    text: 'NuxtTools Watermark',
+    text: '小宾果 Watermark',
     color: '#ffffff',
     alpha: 0.5,
     fontSize: 24,
@@ -228,7 +228,7 @@
     link.click()
   }
 
-  useHead({ title: t('watermark.title') + ' - NuxtTools' })
+  useHead({ title: t('watermark.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

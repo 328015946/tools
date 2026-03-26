@@ -294,7 +294,7 @@
     setTimeout(() => (copied.value = false), 2000)
   }
 
-  useHead({ title: t('svgpath.title') + ' - NuxtTools' })
+  useHead({ title: t('svgpath.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

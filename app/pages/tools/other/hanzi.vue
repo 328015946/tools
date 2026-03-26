@@ -155,7 +155,7 @@
     renderWriters()
   })
 
-  useHead({ title: t('hanzi.title') + ' - NuxtTools' })
+  useHead({ title: t('hanzi.title') + ' - 小宾果' })
 </script>
 
 <style>

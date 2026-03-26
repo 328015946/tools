@@ -259,7 +259,7 @@
 
   onMounted(generateData)
 
-  useHead({ title: t('mock.title') + ' - NuxtTools' })
+  useHead({ title: t('mock.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

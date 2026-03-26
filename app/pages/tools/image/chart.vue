@@ -250,7 +250,7 @@
     link.click()
   }
 
-  useHead({ title: t('chart.title') + ' - NuxtTools' })
+  useHead({ title: t('chart.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

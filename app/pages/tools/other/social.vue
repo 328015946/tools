@@ -89,5 +89,5 @@
     if (file) form.image = URL.createObjectURL(file)
   }
 
-  useHead({ title: t('social.title') + ' - NuxtTools' })
+  useHead({ title: t('social.title') + ' - 小宾果' })
 </script>

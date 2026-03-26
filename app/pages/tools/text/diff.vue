@@ -94,7 +94,7 @@
     return result
   })
 
-  useHead({ title: t('diff.title') + ' - NuxtTools' })
+  useHead({ title: t('diff.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

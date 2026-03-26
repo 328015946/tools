@@ -169,5 +169,5 @@
 
   onMounted(fetchRate)
 
-  useHead({ title: t('currency.title') + ' - NuxtTools' })
+  useHead({ title: t('currency.title') + ' - 小宾果' })
 </script>

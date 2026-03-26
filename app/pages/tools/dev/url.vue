@@ -61,5 +61,5 @@
     errorMsg.value = null
   }
 
-  useHead({ title: t('url.title') + ' - NuxtTools' })
+  useHead({ title: t('url.title') + ' - 小宾果' })
 </script>

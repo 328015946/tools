@@ -188,7 +188,7 @@
     }
   }
 
-  useHead({ title: t('svg_edit.title') + ' - NuxtTools' })
+  useHead({ title: t('svg_edit.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

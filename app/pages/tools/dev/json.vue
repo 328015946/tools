@@ -156,7 +156,7 @@
   }
 
   useHead({
-    title: t('json.title') + ' - NuxtTools',
+    title: t('json.title') + ' - 小宾果',
     meta: [{ name: 'description', content: t('json.desc') }]
   })
 </script>

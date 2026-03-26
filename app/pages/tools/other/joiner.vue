@@ -153,5 +153,5 @@
     link.click()
   }
 
-  useHead({ title: t('joiner.title') + ' - NuxtTools' })
+  useHead({ title: t('joiner.title') + ' - 小宾果' })
 </script>

@@ -121,5 +121,5 @@
     setTimeout(() => (copied.value = false), 2000)
   }
 
-  useHead({ title: t('img_base64.title') + ' - NuxtTools' })
+  useHead({ title: t('img_base64.title') + ' - 小宾果' })
 </script>

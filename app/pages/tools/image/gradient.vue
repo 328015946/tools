@@ -146,7 +146,7 @@
     copyToClipboard(`background: ${cssValue.value};`)
   }
 
-  useHead({ title: t('gradient.title') + ' - NuxtTools' })
+  useHead({ title: t('gradient.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

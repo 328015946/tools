@@ -71,5 +71,5 @@
     })
   })
 
-  useHead({ title: t('palette.title') + ' - NuxtTools' })
+  useHead({ title: t('palette.title') + ' - 小宾果' })
 </script>

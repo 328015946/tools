@@ -177,7 +177,7 @@
   // 实际上上面的模板我写的是 copy(formatResult(res))，这有点难定位是哪个按钮。
   // 让我们优化一下模板里的按钮点击事件：
 
-  useHead({ title: t('hash.title') + ' - NuxtTools' })
+  useHead({ title: t('hash.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

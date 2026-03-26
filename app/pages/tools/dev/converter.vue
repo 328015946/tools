@@ -237,7 +237,7 @@
 
   watch([inputData, mode, rootClass, packageName], convert)
 
-  useHead({ title: t('converter.title') + ' - NuxtTools' })
+  useHead({ title: t('converter.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

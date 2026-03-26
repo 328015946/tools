@@ -100,7 +100,7 @@
 
   // SEO Meta
   useHead({
-    title: t('base64.title') + ' - NuxtTools',
+    title: t('base64.title') + ' - 小宾果',
     meta: [{ name: 'description', content: t('base64.desc') }]
   })
 </script>

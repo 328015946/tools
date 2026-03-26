@@ -181,7 +181,7 @@
     setTimeout(() => (copied.value = false), 2000)
   }
 
-  useHead({ title: t('shadow.title') + ' - NuxtTools' })
+  useHead({ title: t('shadow.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

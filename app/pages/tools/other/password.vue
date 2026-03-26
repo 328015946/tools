@@ -197,5 +197,5 @@
 
   onMounted(generate)
 
-  useHead({ title: t('pwd.title') + ' - NuxtTools' })
+  useHead({ title: t('pwd.title') + ' - 小宾果' })
 </script>

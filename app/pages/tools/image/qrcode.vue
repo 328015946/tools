@@ -122,5 +122,5 @@
     { immediate: true }
   )
 
-  useHead({ title: t('qrcode.title') + ' - NuxtTools' })
+  useHead({ title: t('qrcode.title') + ' - 小宾果' })
 </script>

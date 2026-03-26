@@ -58,5 +58,5 @@
     return devices.filter(d => d.name.toLowerCase().includes(q))
   })
 
-  useHead({ title: t('screen.title') + ' - NuxtTools' })
+  useHead({ title: t('screen.title') + ' - 小宾果' })
 </script>

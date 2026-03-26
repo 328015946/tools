@@ -102,7 +102,7 @@
     }
   }
 
-  useHead({ title: t('base.title') + ' - NuxtTools' })
+  useHead({ title: t('base.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

@@ -104,7 +104,7 @@
 
   // SEO
   useHead({
-    title: t('md.title') + ' - NuxtTools',
+    title: t('md.title') + ' - 小宾果',
     meta: [{ name: 'description', content: t('md.desc') }]
   })
 </script>

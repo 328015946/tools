@@ -89,7 +89,7 @@
   watch([input, dialect], format)
   onMounted(format)
 
-  useHead({ title: t('sql.title') + ' - NuxtTools' })
+  useHead({ title: t('sql.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

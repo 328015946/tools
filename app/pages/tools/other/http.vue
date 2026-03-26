@@ -223,7 +223,7 @@
     }
   }
 
-  useHead({ title: t('http.title') + ' - NuxtTools' })
+  useHead({ title: t('http.title') + ' - 小宾果' })
 </script>
 
 <style scoped>

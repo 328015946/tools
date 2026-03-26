@@ -122,5 +122,5 @@
 
   watch(token, decode)
 
-  useHead({ title: t('jwt.title') + ' - NuxtTools' })
+  useHead({ title: t('jwt.title') + ' - 小宾果' })
 </script>

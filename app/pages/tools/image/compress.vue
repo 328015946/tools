@@ -253,7 +253,7 @@
 
   // SEO
   useHead({
-    title: t('img.title') + ' - NuxtTools',
+    title: t('img.title') + ' - 小宾果',
     meta: [{ name: 'description', content: t('img.desc') }]
   })
 </script>

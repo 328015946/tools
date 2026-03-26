@@ -101,7 +101,7 @@
 
   const { t } = useI18n()
 
-  const text = ref('NuxtTools')
+  const text = ref('小宾果')
   const format = ref('CODE128')
   const width = ref(2)
   const height = ref(100)
@@ -171,5 +171,5 @@
 
   onMounted(generate)
 
-  useHead({ title: t('barcode.title') + ' - NuxtTools' })
+  useHead({ title: t('barcode.title') + ' - 小宾果' })
 </script>
