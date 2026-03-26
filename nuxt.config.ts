@@ -12,12 +12,22 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss',
     '@nuxtjs/i18n' // 确保引入了模块
   ],
-  nitro: {
-    // 告诉 Nuxt 打包成 Cloudflare Pages 格式
-    preset: 'cloudflare-pages'
+
+  app: {
+    head: {
+      titleTemplate: '%s - 小宾果 | 提升效率的在线工具箱',
+      charset: 'utf-8',
+      viewport: 'width=device-width, initial-scale=1',
+      link: [
+        { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      ]
+    }
   },
 
   i18n: {
+    // 启用 SEO 优化
+    baseUrl: 'https://tools.your-domain.com', // 请替换为您的实际域名
+    seo: true,
     // 启用懒加载翻译文件（性能更好）
     lazy: true,
     // 翻译文件存放的文件夹（根目录下的 locales）

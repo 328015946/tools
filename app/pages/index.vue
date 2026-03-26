@@ -95,6 +95,14 @@
   const { t } = useI18n()
   const { tools } = useTools()
 
+  useSeoMeta({
+    title: t('home.hero_title'),
+    ogTitle: t('home.hero_title'),
+    description: t('home.hero_subtitle'),
+    ogDescription: t('home.hero_subtitle'),
+    keywords: 'JSON格式化,图片压缩,Base64,时间戳,打字练习,在线工具箱,开发者工具'
+  })
+
   const searchQuery = ref('')
   const activeCategory = ref('all') // 当前选中的分类
 

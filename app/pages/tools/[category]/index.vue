@@ -52,6 +52,6 @@
 
   // SEO
   useHead({
-    title: `${categoryTitle.value} - NuxtTools`
+    title: `${categoryTitle.value} - 小宾果`
   })
 </script>

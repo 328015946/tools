@@ -1060,19 +1060,23 @@
     "desc": "在线海报设计工具，支持自定义背景、拖拽素材、文字编辑与高清导出。"
   },
   "watermark_remover": {
-    "title": "智能图片去水印",
-    "desc": "涂抹水印区域，AI 自动修复背景",
-    "upload": "上传图片",
-    "brush_size": "笔刷大小",
-    "drawing": "涂抹中...",
-    "start_draw": "开始涂抹",
-    "clear": "清除",
-    "processing": "处理中...",
-    "remove_btn": "立即去除水印",
-    "download": "下载结果",
-    "placeholder": "请上传图片开始编辑",
-    "success": "去水印完成！",
-    "error": "处理失败，请重试",
-    "reset": "重置"
+  "title": "智能图片去水印",
+  "desc": "涂抹水印区域，AI 自动修复背景",
+  "upload": "上传图片",
+  "brush_size": "笔刷大小",
+  "drawing": "涂抹中...",
+  "start_draw": "开始涂抹",
+  "clear": "清除",
+  "processing": "处理中...",
+  "remove_btn": "立即去除水印",
+  "download": "下载结果",
+  "placeholder": "请上传图片开始编辑",
+  "success": "去水印完成！",
+  "error": "处理失败，请重试",
+  "reset": "重置"
+  },
+  "footer": {
+  "copy": "© {year} 小宾果 - 提升效率的在线工具箱. 保留所有权利。",
+  "icp": "粤ICP备2026021648号-2"
   }
-}
+  }
