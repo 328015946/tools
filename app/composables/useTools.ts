@@ -578,6 +578,16 @@ export const useTools = () => {
       category: 'nav.docs_tools',
       categorySlug: 'docs',
       path: '/tools/docs/ai'
+    },
+    {
+      id: 56,
+      nameKey: 'cheatsheet.nodejs_title',
+      descKey: 'cheatsheet.nodejs_desc',
+      icon: '📦',
+      color: 'bg-green-50 text-green-600',
+      category: 'nav.docs_tools',
+      categorySlug: 'docs',
+      path: '/tools/docs/nodejs'
     }
   ]
 

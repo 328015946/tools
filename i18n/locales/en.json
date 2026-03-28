@@ -500,7 +500,9 @@
     "port_title": "Common Ports",
     "port_desc": "Default ports for common services (MySQL, Redis...)",
     "ai_title": "AI Cheatsheet",
-    "ai_desc": "Gemini and Claude CLI commands, installation and usage guide"
+    "ai_desc": "Gemini and Claude CLI commands, installation and usage guide",
+    "nodejs_title": "Node.js Cheatsheet",
+    "nodejs_desc": "Node.js installation, NVM management, NPM package commands"
   },
   "cheatsheet_data": {
     "git": {
@@ -721,6 +723,28 @@
       "desc_prompt_format": "Specify output format for structured results",
       "prompt_example": "Example: {input example} -> {expected output}",
       "desc_prompt_example": "Provide examples to show expected results"
+    },
+    "nodejs": {
+      "cat_install": "Node.js Installation & Version",
+      "desc_version": "Check Node.js version",
+      "desc_npm_version": "Check NPM version",
+      "desc_linux_install": "Install Node.js 20.x on Linux",
+      "desc_mac_install": "Install via Homebrew on macOS",
+      "cat_nvm": "NVM Version Management",
+      "desc_nvm_install": "Install NVM (Node Version Manager)",
+      "desc_nvm_install_node": "Install specific Node.js version",
+      "desc_nvm_use": "Switch to specific version",
+      "desc_nvm_list": "List installed versions",
+      "desc_nvm_default": "Set default version",
+      "desc_nvm_uninstall": "Uninstall specific version",
+      "cat_npm": "NPM Package Management",
+      "desc_npm_init": "Initialize project (generate package.json)",
+      "desc_npm_install": "Install package",
+      "desc_npm_global": "Install package globally",
+      "desc_npm_uninstall": "Uninstall package",
+      "desc_npm_update": "Update all dependencies",
+      "desc_npm_list": "List installed packages",
+      "desc_npm_outdated": "Check outdated packages"
     }
   },
   "case": {

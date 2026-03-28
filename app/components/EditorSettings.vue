@@ -46,6 +46,22 @@
     refreshUI()
   }
 
+  // 处理文字颜色变化（支持选中部分文字）
+  const handleTextColorChange = (color: string) => {
+    const obj = props.activeObject
+    if (!obj || obj.type !== 'i-text') return
+
+    // 如果有选中的文字范围，只改变选中部分
+    if (obj.selectionStart !== obj.selectionEnd) {
+      obj.setSelectionStyles({ fill: color })
+      obj.canvas?.requestRenderAll()
+      refreshUI()
+    } else {
+      // 没有选中文字，改变整体颜色
+      update('fill', color)
+    }
+  }
+
   const handleToggleStyle = (style: string) => {
     emit('toggle-style', style)
     refreshUI()
@@ -379,7 +395,7 @@
               <input
                 type="color"
                 :value="normalizeColor(activeObject.fill)"
-                @input="(e:any)=>update('fill', e.target.value)"
+                @input="(e:any)=>handleTextColorChange(e.target.value)"
                 class="color-picker" />
             </div>
           </div>

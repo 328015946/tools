@@ -500,7 +500,9 @@
     "port_title": "常用端口对照表",
     "port_desc": "常见服务默认端口号清单 (MySQL, Redis, SSH...)",
     "ai_title": "AI 命令速查",
-    "ai_desc": "Gemini 和 Claude CLI 命令、安装及常用操作指南"
+    "ai_desc": "Gemini 和 Claude CLI 命令、安装及常用操作指南",
+    "nodejs_title": "Node.js 速查",
+    "nodejs_desc": "Node.js 安装、NVM 管理、NPM 包管理常用命令"
   },
   "cheatsheet_data": {
     "git": {
@@ -721,6 +723,28 @@
       "desc_prompt_format": "指定输出格式，获得结构化结果",
       "prompt_example": "参考示例：{input} -> {output}",
       "desc_prompt_example": "提供示例，让 AI 理解预期效果"
+    },
+    "nodejs": {
+      "cat_install": "Node.js 安装与版本查看",
+      "desc_version": "查看 Node.js 版本",
+      "desc_npm_version": "查看 NPM 版本",
+      "desc_linux_install": "Linux 安装 Node.js 20.x",
+      "desc_mac_install": "macOS 通过 Homebrew 安装",
+      "cat_nvm": "NVM 版本管理",
+      "desc_nvm_install": "安装 NVM（Node Version Manager）",
+      "desc_nvm_install_node": "安装指定版本 Node.js",
+      "desc_nvm_use": "切换到指定版本",
+      "desc_nvm_list": "列出已安装的版本",
+      "desc_nvm_default": "设置默认版本",
+      "desc_nvm_uninstall": "卸载指定版本",
+      "cat_npm": "NPM 包管理",
+      "desc_npm_init": "初始化项目（生成 package.json）",
+      "desc_npm_install": "安装依赖包",
+      "desc_npm_global": "全局安装包",
+      "desc_npm_uninstall": "卸载依赖包",
+      "desc_npm_update": "更新所有依赖",
+      "desc_npm_list": "列出已安装的包",
+      "desc_npm_outdated": "检查过期的包"
     }
   },
   "case": {
