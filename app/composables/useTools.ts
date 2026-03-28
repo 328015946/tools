@@ -568,6 +568,16 @@ export const useTools = () => {
       category: 'nav.image_tools',
       categorySlug: 'image',
       path: '/tools/image/watermark-remover'
+    },
+    {
+      id: 55,
+      nameKey: 'cheatsheet.ai_title',
+      descKey: 'cheatsheet.ai_desc',
+      icon: '🤖',
+      color: 'bg-purple-50 text-purple-600',
+      category: 'nav.docs_tools',
+      categorySlug: 'docs',
+      path: '/tools/docs/ai'
     }
   ]
 
