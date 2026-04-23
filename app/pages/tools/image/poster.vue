@@ -75,6 +75,8 @@
   let transformStart = { left: 0, top: 0 }
   let constraintAxis: 'h' | 'v' | null = null
   let isCopying = false
+  // [新增] 记录文本选区，用于失去焦点后应用样式
+  let lastSelection: { start: number; end: number } | null = null
 
   // =================================================================
   // 3. 画布初始化与事件绑定
@@ -122,6 +124,7 @@
     // 基础 Fabric 事件
     // 🟢 监听选中事件
     c.on('selection:created', e => {
+      lastSelection = null // [新增] 重置选区
       // 如果当前是马赛克模式，且选中的不是正在画的东西（虽然drawing模式下很难选中别的）
       // 但为了保险：
       if (effects.isMosaicBrushMode.value) {
@@ -132,8 +135,13 @@
       }
       updateActiveObject(e)
     })
-    c.on('selection:updated', updateActiveObject)
-    c.on('selection:cleared', () => (activeObject.value = null))
+    c.on('selection:updated', () => {
+      updateActiveObject()
+    })
+    c.on('selection:cleared', () => {
+      activeObject.value = null
+      lastSelection = null
+    })
     c.on('object:modified', saveHistory)
     c.on('object:added', () => {
       updateLayerList()
@@ -148,6 +156,15 @@
         const width = obj.width * obj.scaleX
         const height = obj.height * obj.scaleY
         obj.set({ width, height, scaleX: 1, scaleY: 1 })
+      }
+    })
+
+    // [新增] 监听文本选区变化
+    c.on('text:selection:changed', (e: any) => {
+      const t = e.target
+      // 仅在编辑模式下记录选区，防止 blur 时触发的 selection 归零覆盖了有效选区
+      if (t && (t.type === 'i-text' || t.type === 'textbox') && t.isEditing) {
+        lastSelection = { start: t.selectionStart, end: t.selectionEnd }
       }
     })
 
@@ -482,6 +499,68 @@
     if (action === 'copyStyle') objects.copyStyle()
     if (action === 'pasteStyle') objects.pasteStyle()
   }
+
+  // 处理属性更新 (支持文本局部样式)
+  const handleUpdateProp = (key: string, value: any) => {
+    const active = toRaw(activeObject.value)
+    // 如果是文本对象
+    if (active && (active.type === 'i-text' || active.type === 'textbox')) {
+      // 判断是否处于编辑状态，或者有残留的选区
+      const isEditing = active.isEditing
+      // 只有当选区存在且 start != end 时才认为是局部修改
+      const hasSelection = lastSelection && lastSelection.start !== lastSelection.end
+
+      // 仅针对支持局部样式的属性
+      if (
+        (isEditing || hasSelection) &&
+        [
+          'fill',
+          'fontSize',
+          'fontFamily',
+          'fontWeight',
+          'fontStyle',
+          'underline',
+          'linethrough',
+          'overline',
+          'backgroundColor'
+        ].includes(key)
+      ) {
+        // 获取选区范围 (优先使用当前编辑状态，否则使用残留选区)
+        const start = isEditing ? active.selectionStart : lastSelection ? lastSelection.start : 0
+        const end = isEditing ? active.selectionEnd : lastSelection ? lastSelection.end : 0
+
+        // 再次校验范围
+        // 如果有选区(start!=end) 或者 正在编辑中(isEditing, 此时可能是光标样式)，都走局部样式逻辑
+        if (start !== end || isEditing) {
+          // 临时恢复选区以确保样式应用正确
+          const prevStart = active.selectionStart
+          const prevEnd = active.selectionEnd
+
+          active.selectionStart = start
+          active.selectionEnd = end
+
+          // 针对 fontSize 确保转换为数字，避免字符串导致样式失效
+          const finalValue = key === 'fontSize' ? Number(value) : value
+          active.setSelectionStyles({ [key]: finalValue })
+
+          // 恢复 (如果不在编辑模式，其实无所谓，但为了安全)
+          active.selectionStart = prevStart
+          active.selectionEnd = prevEnd
+
+          active.set('dirty', true)
+          // 如果修改了字体大小，文字总宽度会变，需要更新控制点
+          if (key === 'fontSize') {
+            active.setCoords()
+          }
+          canvas.value.requestRenderAll()
+          saveHistory()
+          return
+        }
+      }
+    }
+    objects.updateProp(key, value)
+  }
+
   const showExport = ref(false)
   const downloadImage = () => {
     showExport.value = true
@@ -758,7 +837,7 @@
         :active-object="activeObject"
         :is-removing-bg="effects.isRemovingBg.value"
         :is-mosaic-mode="effects.isMosaicBrushMode.value"
-        @update-prop="objects.updateProp"
+        @update-prop="handleUpdateProp"
         @delete="objects.deleteActive"
         @group="objects.groupObjects"
         @ungroup="objects.ungroupObjects"

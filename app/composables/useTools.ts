@@ -588,6 +588,16 @@ export const useTools = () => {
       category: 'nav.docs_tools',
       categorySlug: 'docs',
       path: '/tools/docs/nodejs'
+    },
+    {
+      id: 57,
+      nameKey: 'ssl.title',
+      descKey: 'ssl.desc',
+      icon: '🔒',
+      color: 'bg-blue-100 text-blue-600',
+      category: 'nav.dev_tools',
+      categorySlug: 'dev',
+      path: '/tools/dev/ssl'
     }
   ]
 
