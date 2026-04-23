@@ -102,8 +102,11 @@ export function useLayerSystem(canvas: any, fabric: any, activeObject: any, save
       canvas.value.setActiveObject(proxy)
 
       if (autoEdit && ['i-text', 'text', 'textbox'].includes(proxy.type)) {
-        proxy.enterEditing()
-        proxy.selectAll()
+        setTimeout(() => {
+          proxy.enterEditing()
+          proxy.selectAll()
+          canvas.value.requestRenderAll()
+        }, 50)
       }
 
       const sync = () => {

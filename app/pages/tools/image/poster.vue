@@ -290,13 +290,40 @@
         tools.finishPenDrawing()
         return
       }
-      // 2. 进入剪裁 / 组编辑
+      
       const target = toRaw(opt.target)
-      if (target?.type === 'image') tools.startCrop(target)
-      if (target?.type === 'group') {
-        // 找到具体点击的子元素
-        const subTarget = target.getObjects().find((o: any) => o.containsPoint(opt.pointer, true))
-        if (subTarget) activateProxyMode(subTarget, target, true)
+      if (!target) return
+
+      // 2. 进入剪裁
+      if (target.type === 'image') {
+        tools.startCrop(target)
+        return
+      }
+
+      // 3. 组穿透编辑
+      if (target.type === 'group') {
+        // 获取点击位置
+        const pointer = c.getPointer(opt.e)
+        
+        // 递归寻找最深层的子元素
+        const findDeepest = (group: any, point: any): any => {
+          const objs = group.getObjects()
+          // 从上往下找
+          for (let i = objs.length - 1; i >= 0; i--) {
+            const obj = objs[i]
+            // 需要转换坐标点到对象的局部坐标空间进行判断，Fabric 的 containsPoint 处理了这点
+            if (obj.containsPoint(point)) {
+              if (obj.type === 'group') return findDeepest(obj, point)
+              return { obj, parent: group }
+            }
+          }
+          return null
+        }
+
+        const result = findDeepest(target, pointer)
+        if (result) {
+          activateProxyMode(result.obj, result.parent, true)
+        }
       }
     })
 
